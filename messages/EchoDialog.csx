@@ -1,9 +1,13 @@
+#r "Newtonsoft.Json"
 #load "Models.csx"
 
 using System;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
 
 // For more information about this template visit http://aka.ms/azurebots-csharp-basic
 [Serializable]
@@ -43,12 +47,27 @@ public class EchoDialog : IDialog<object>
                 promptStyle: PromptStyle.Auto);
         }
         else
-        if (message.Text.ToLower() == "can i park")
         {
+            if (message.Text.ToLower() == "can i park")
             {
-                var msg = "You can park";
+
+                var parkInfo = new ParkingStatus();
+
+                HttpClient client = new HttpClient()
+                {
+                    BaseAddress = new Uri("http://mindparkfacilityapi.azurewebsites.net")
+                };
+                var response = await client.GetAsync($"api/parking/1");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    parkInfo = JsonConvert.DeserializeObject<ParkingStatus>(json);
+                }
+
+                var msg = $"You can park. there are {parkInfo.Current} places";
                 context.SayAsync(msg, msg);
             }
+            else
             {
                 await context.PostAsync($"{this.count++}: You said {message.Text}");
                 context.Wait(MessageReceivedAsync);
@@ -71,3 +90,4 @@ public class EchoDialog : IDialog<object>
         context.Wait(MessageReceivedAsync);
     }
 }
+
