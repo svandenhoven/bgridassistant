@@ -64,8 +64,16 @@ public class EchoDialog : IDialog<object>
                     parkInfo = JsonConvert.DeserializeObject<ParkingStatus>(json);
                 }
 
-                var msg = $"You can park. there are {parkInfo.Current} places";
-                context.SayAsync(msg, msg);
+                if (parkInfo.Current > 0)
+                {
+                    var msg = $"You can park, there are {parkInfo.Current} places";
+                    context.SayAsync(msg, msg);
+                }
+                else
+                {
+                    var msg = $"Parking is full.";
+                    context.SayAsync(msg, msg);
+                }
             }
             else
             {
