@@ -33,3 +33,10 @@ public class ParkingPlace
     public int FreePlace { get; set; }
     public int Capacity { get; set; }
 }
+
+
+public class bGridTemperature
+{
+    public int timestamp { get; set; }
+    public float value { get; set; }
+}

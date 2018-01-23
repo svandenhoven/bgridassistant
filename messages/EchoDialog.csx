@@ -8,6 +8,7 @@ using Microsoft.Bot.Connector;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
+using System.Text;
 
 // For more information about this template visit http://aka.ms/azurebots-csharp-basic
 [Serializable]
@@ -33,6 +34,41 @@ public class EchoDialog : IDialog<object>
         return Task.CompletedTask;
     }
 
+    private HttpClient GetHttpClient()
+    {
+        var bGridClient = new HttpClient()
+        {
+            BaseAddress = new Uri("https://wsn-demo.evalan.com:8443")
+        };
+        var byteArray = Encoding.ASCII.GetBytes("demo_set_1:Hp3B9E71b44DbJ2G9kxE");
+        bGridClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+        return bGridClient;
+    }
+
+    private async Task<string> SwitchLights(string state)
+    {
+        var bGridClient = GetHttpClient();
+        var json = "{ \"status\" : \"" + state + "\", \"return_address\":\"localhost\" }";
+        var ob = new
+        {
+            status = "on",
+            return_address = "localhost"
+        };
+
+        var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var lightResponse = await bGridClient.PostAsync("/api/islands/101/light/status", httpContent);
+        if (lightResponse.IsSuccessStatusCode)
+        {
+            return $"The light is {state}.";
+            
+        }
+        else
+        {
+            return $"Could not switch light";
+        }
+    }
+
     public virtual async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> argument)
     {
         var message = await argument;
@@ -48,37 +84,66 @@ public class EchoDialog : IDialog<object>
         }
         else
         {
-            if (message.Text.ToLower() == "can i park")
+            var msg = "";
+            switch (message.Text.ToLower())
             {
+                case "what is temperature":
+                    var bGridClient = GetHttpClient();
 
-                var parkInfo = new ParkingStatus();
+                    var tempResponse = await bGridClient.GetAsync("api/locations/416/temperature");
+                    if (tempResponse.IsSuccessStatusCode)
+                    {
+                        var json = await tempResponse.Content.ReadAsStringAsync();
+                        var tempInfo = JsonConvert.DeserializeObject<List<bGridTemperature>>(json);
+                        var temp = tempInfo.Last();
+                        msg = $"The temperature is {Math.Round(temp.value,0, MidpointRounding.AwayFromZero)} degrees celcius.";
+                        await context.SayAsync(msg, msg);
+                    }
+                    else
+                    {
+                        msg = $"Could not retrieve temperature.";
+                        await context.SayAsync(msg, msg);
+                    }
+                    break;
 
-                HttpClient client = new HttpClient()
-                {
-                    BaseAddress = new Uri("http://mindparkfacilityapi.azurewebsites.net")
-                };
-                var response = await client.GetAsync($"api/parking/1");
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-                    parkInfo = JsonConvert.DeserializeObject<ParkingStatus>(json);
-                }
+                case "light on":
+                    msg = await SwitchLights("on");
+                    await context.SayAsync(msg, msg);
 
-                if (parkInfo.Current > 0)
-                {
-                    var msg = $"You can park, there are {parkInfo.Current} places available.";
-                    context.SayAsync(msg, msg);
-                }
-                else
-                {
-                    var msg = $"Parking is full.";
-                    context.SayAsync(msg, msg);
-                }
-            }
-            else
-            {
-                await context.PostAsync($"{this.count++}: You said {message.Text}");
-                context.Wait(MessageReceivedAsync);
+                    break;
+                case "light off":
+                    msg = await SwitchLights("off");
+                    await context.SayAsync(msg, msg);
+                    break;
+                case "can i park":
+                    var parkInfo = new ParkingStatus();
+
+                    var client = new HttpClient()
+                    {
+                        BaseAddress = new Uri("http://mindparkfacilityapi.azurewebsites.net")
+                    };
+                    var response = await client.GetAsync($"api/parking/1");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        parkInfo = JsonConvert.DeserializeObject<ParkingStatus>(json);
+                    }
+
+                    if (parkInfo.Current > 0)
+                    {
+                        msg = $"You can park, there are {parkInfo.Current} places available.";
+                        await context.SayAsync(msg, msg);
+                    }
+                    else
+                    {
+                        msg = $"Parking is full.";
+                        await context.SayAsync(msg, msg);
+                    }
+                    break;
+                default:
+                    await context.PostAsync($"{this.count++}: You said {message.Text}");
+                    context.Wait(MessageReceivedAsync);
+                    break;
             }
         }
     }
