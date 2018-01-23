@@ -66,7 +66,7 @@ public class EchoDialog : IDialog<object>
 
                 if (parkInfo.Current > 0)
                 {
-                    var msg = $"You can park, there are {parkInfo.Current} places";
+                    var msg = $"You can park, there are {parkInfo.Current} places available.";
                     context.SayAsync(msg, msg);
                 }
                 else
