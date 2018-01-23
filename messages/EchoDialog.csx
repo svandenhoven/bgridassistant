@@ -1,3 +1,5 @@
+#load "Models.csx"
+
 using System;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
@@ -32,6 +34,7 @@ public class EchoDialog : IDialog<object>
         var message = await argument;
         if (message.Text.ToLower() == "reset")
         {
+
             PromptDialog.Confirm(
                 context,
                 AfterResetAsync,
@@ -40,9 +43,16 @@ public class EchoDialog : IDialog<object>
                 promptStyle: PromptStyle.Auto);
         }
         else
+        if (message.Text.ToLower() == "can i park")
         {
-            await context.PostAsync($"{this.count++}: You said {message.Text}");
-            context.Wait(MessageReceivedAsync);
+            {
+                var msg = "You can park";
+                context.SayAsync(msg, msg);
+            }
+            {
+                await context.PostAsync($"{this.count++}: You said {message.Text}");
+                context.Wait(MessageReceivedAsync);
+            }
         }
     }
 

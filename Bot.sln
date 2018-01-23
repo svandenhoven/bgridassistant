@@ -1,7 +1,6 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "Func", "%USERPROFILE%\AppData\Roaming\npm\node_modules\azure-functions-cli\bin\Func.exe", "{C3D4B696-69FC-43D3-9DE6-21FEF4184A2B}"
 	ProjectSection(DebuggerProjectSystem) = preProject
@@ -28,6 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "messages", "messages", "{F4
 	ProjectSection(SolutionItems) = preProject
 		messages\EchoDialog.csx = messages\EchoDialog.csx
 		messages\function.json = messages\function.json
+		Models.csx = Models.csx
 		messages\project.json = messages\project.json
 		messages\project.lock.json = messages\project.lock.json
 		messages\run.csx = messages\run.csx
@@ -51,5 +51,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F4D9DF3B-F4E4-4E19-9053-3AF71A3189FA} = {36665A78-4D93-48C7-B432-4DA46AA140D5}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DC9ABED3-9D3E-441A-99D1-CB357BD5FD61}
 	EndGlobalSection
 EndGlobal
