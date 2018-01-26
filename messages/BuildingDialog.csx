@@ -41,11 +41,21 @@ public class BuildingDialog : LuisDialog<object>
         var gotRoom = result.TryFindEntity("Room", out roomEntity);
 
         var roomId = "0";
-        if(gotRoom)
+        if (gotRoom)
         {
             roomId = roomEntity.Entity;
-        }
+            var msg = await GetTemperature(roomId);
+            await context.SayAsync(msg, msg);
 
+        }
+        else
+        {
+            PromptDialog.Text(context, ResumeAfterOrderRoomClarification, "For which room do you want to know temperature?");
+        }
+    }
+
+    private async Task<string> GetTemperature(string roomId)
+    {
         var bGridClient = GetHttpClient();
 
         var tempResponse = await bGridClient.GetAsync($"api/locations/{roomId}/temperature");
@@ -54,17 +64,20 @@ public class BuildingDialog : LuisDialog<object>
             var json = await tempResponse.Content.ReadAsStringAsync();
             var tempInfo = JsonConvert.DeserializeObject<List<bGridTemperature>>(json);
             var temp = tempInfo.Last();
-            var msg = $"The temperature in {roomId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
-            await context.SayAsync(msg, msg);
+            return $"The temperature in {roomId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";         
         }
         else
         {
-            var msg = $"Could not retrieve temperature.";
-            await context.SayAsync(msg, msg);
+            return $"Could not retrieve temperature.";
         }
     }
 
-
+    private async Task ResumeAfterOrderRoomClarification(IDialogContext context, IAwaitable<string> result)
+    {
+        var roomId = await result;
+        var msg = await GetTemperature(roomId);
+        await context.SayAsync(msg, msg);
+    }
 
     [LuisIntent("None")]
     public async Task NoneIntent(IDialogContext context, LuisResult result)
