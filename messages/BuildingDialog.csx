@@ -50,7 +50,10 @@ public class BuildingDialog : LuisDialog<object>
         }
         else
         {
-            PromptDialog.Text(context, ResumeAfterOrderRoomClarification, "For which room do you want to know temperature?");
+            var promptText = "For which room do you want to know temperature?";
+            var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+            var prompt = new PromptDialog.PromptString(promptOption);
+            context.Call<string>(prompt, this.ResumeAfterOrderRoomClarification);
         }
     }
 
