@@ -66,12 +66,19 @@ public class BuildingDialog : LuisDialog<object>
         {
             var json = await tempResponse.Content.ReadAsStringAsync();
             var tempInfo = JsonConvert.DeserializeObject<List<bGridTemperature>>(json);
-            var temp = tempInfo.Last();
-            return $"The temperature in {roomId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";         
+            if (tempInfo.Count == 0)
+            {
+                return $"I do not have information on room {roomId} for you.";
+            }
+            else
+            {
+                var temp = tempInfo.Last();
+                return $"The temperature in {roomId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
+            }
         }
         else
         {
-            return $"Could not retrieve temperature.";
+            return $"Could not retrieve temperature for {roomId}.";
         }
     }
 
