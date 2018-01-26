@@ -40,10 +40,9 @@ public class BuildingDialog : LuisDialog<object>
 
         var gotRoom = result.TryFindEntity("Room", out roomEntity);
 
-        var roomId = "0";
         if (gotRoom)
         {
-            roomId = roomEntity.Entity;
+            var roomId = roomEntity.Entity;
             var msg = await GetTemperature(roomId);
             await context.SayAsync(msg, msg);
 
@@ -57,36 +56,31 @@ public class BuildingDialog : LuisDialog<object>
         }
     }
 
-    private async Task<string> GetTemperature(string roomId)
-    {
-        var bGridClient = GetHttpClient();
 
-        var tempResponse = await bGridClient.GetAsync($"api/locations/{roomId}/temperature");
-        if (tempResponse.IsSuccessStatusCode)
+    [LuisIntent("LightSwitch")]
+    public async Task LightSwitch(IDialogContext context, LuisResult result)
+    {
+        EntityRecommendation roomEntity;
+        EntityRecommendation lightStateEntity;
+
+        var gotRoom = result.TryFindEntity("Room", out roomEntity);
+        var gotLightState = result.TryFindEntity("LightStates", out lightStateEntity);
+
+        if (gotRoom && gotLightState)
         {
-            var json = await tempResponse.Content.ReadAsStringAsync();
-            var tempInfo = JsonConvert.DeserializeObject<List<bGridTemperature>>(json);
-            if (tempInfo.Count == 0)
-            {
-                return $"I do not have information on room {roomId} for you.";
-            }
-            else
-            {
-                var temp = tempInfo.Last();
-                return $"The temperature in {roomId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
-            }
+            var roomId = roomEntity.Entity;
+            var lightState = lightStateEntity.Entity;
+            var msg = await SetLight(roomId, lightState);
+            await context.SayAsync(msg, msg);
+
         }
         else
         {
-            return $"Could not retrieve temperature for {roomId}.";
+            var promptText = "For which room do you want to know temperature?";
+            var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+            var prompt = new PromptDialog.PromptString(promptOption);
+            context.Call<string>(prompt, this.ResumeAfterOrderRoomClarification);
         }
-    }
-
-    private async Task ResumeAfterOrderRoomClarification(IDialogContext context, IAwaitable<string> result)
-    {
-        var roomId = await result;
-        var msg = await GetTemperature(roomId);
-        await context.SayAsync(msg, msg);
     }
 
     [LuisIntent("None")]
@@ -130,5 +124,55 @@ public class BuildingDialog : LuisDialog<object>
         var byteArray = Encoding.ASCII.GetBytes("demo_set_1:Hp3B9E71b44DbJ2G9kxE");
         bGridClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
         return bGridClient;
+    }
+    private async Task<string> GetTemperature(string roomId)
+    {
+        var bGridClient = GetHttpClient();
+
+        var tempResponse = await bGridClient.GetAsync($"api/locations/{roomId}/temperature");
+        if (tempResponse.IsSuccessStatusCode)
+        {
+            var json = await tempResponse.Content.ReadAsStringAsync();
+            var tempInfo = JsonConvert.DeserializeObject<List<bGridTemperature>>(json);
+            if (tempInfo.Count == 0)
+            {
+                return $"I do not have information on room {roomId} for you.";
+            }
+            else
+            {
+                var temp = tempInfo.Last();
+                return $"The temperature in {roomId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
+            }
+        }
+        else
+        {
+            return $"Could not retrieve temperature for {roomId}.";
+        }
+    }
+
+    private async Task<string> SetLight(string islandId, string gotLightState)
+    {
+        var bGridClient = GetHttpClient();
+        var json = "{ \"status\" : \"" + gotLightState + "\", \"return_address\":\"localhost\" }";
+
+        var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var lightResponse = await bGridClient.PostAsync($"/api/islands/{islandId}/light/status", httpContent);
+        if (lightResponse.IsSuccessStatusCode)
+        {
+            return $"The light of {islandId} is {gotLightState}.";
+
+        }
+        else
+        {
+            return $"Could not switch light";
+        }
+    }
+
+    private async Task ResumeAfterOrderRoomClarification(IDialogContext context, IAwaitable<string> result)
+    {
+        var roomId = await result;
+        var msg = await GetTemperature(roomId);
+        await context.SayAsync(msg, msg);
     }
 }
