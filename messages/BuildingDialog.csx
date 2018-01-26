@@ -1,22 +1,70 @@
-using System;
-using System.Configuration;
-using System.Threading.Tasks;
+#r "Newtonsoft.Json"
+#load "Models.csx"
 
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using System.Text;
+using System.Threading.Tasks;
+using System.Configuration;
 using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
+using Microsoft.Bot.Connector;
+
 
 // For more information about this template visit http://aka.ms/azurebots-csharp-luis
 [Serializable]
-public class BasicLuisDialog : LuisDialog<object>
+public class BuildingDialog : LuisDialog<object>
 {
-    public BasicLuisDialog() : base(new LuisService(new LuisModelAttribute(
-        ConfigurationManager.AppSettings["LuisAppId"], 
-        ConfigurationManager.AppSettings["LuisAPIKey"], 
-        domain: ConfigurationManager.AppSettings["LuisAPIHostName"])))
+    //public BuildingDialog() : base(new LuisService(new LuisModelAttribute(
+    //    ConfigurationManager.AppSettings["LuisAppId"], 
+    //    ConfigurationManager.AppSettings["LuisAPIKey"], 
+    //    domain: ConfigurationManager.AppSettings["LuisAPIHostName"])))
+    //{
+    //}
+
+    public BuildingDialog() : base(new LuisService(new LuisModelAttribute(
+    "bd1b92d3-076a-46c7-a1bb-2e10d9962f40",
+    "8248c94c11e743c58e29411c0219734d",
+    domain: "westeurope.api.cognitive.microsoft.com")))
     {
     }
+
+    [LuisIntent("GetTemperature")]
+    public async Task GetTemperature(IDialogContext context, LuisResult result)
+    {
+        EntityRecommendation roomEntity;
+
+        var gotRoom = result.TryFindEntity("Room", out roomEntity);
+
+        var roomId = "0";
+        if(gotRoom)
+        {
+            roomId = roomEntity.Entity;
+        }
+
+        var bGridClient = GetHttpClient();
+
+        var tempResponse = await bGridClient.GetAsync($"api/locations/{roomId}/temperature");
+        if (tempResponse.IsSuccessStatusCode)
+        {
+            var json = await tempResponse.Content.ReadAsStringAsync();
+            var tempInfo = JsonConvert.DeserializeObject<List<bGridTemperature>>(json);
+            var temp = tempInfo.Last();
+            var msg = $"The temperature in {roomId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
+            await context.SayAsync(msg, msg);
+        }
+        else
+        {
+            var msg = $"Could not retrieve temperature.";
+            await context.SayAsync(msg, msg);
+        }
+    }
+
+
 
     [LuisIntent("None")]
     public async Task NoneIntent(IDialogContext context, LuisResult result)
@@ -48,5 +96,16 @@ public class BasicLuisDialog : LuisDialog<object>
     {
         await context.PostAsync($"You have reached {result.Intents[0].Intent}. You said: {result.Query}");
         context.Wait(MessageReceived);
+    }
+
+    private HttpClient GetHttpClient()
+    {
+        var bGridClient = new HttpClient()
+        {
+            BaseAddress = new Uri("https://wsn-demo.evalan.com:8443")
+        };
+        var byteArray = Encoding.ASCII.GetBytes("demo_set_1:Hp3B9E71b44DbJ2G9kxE");
+        bGridClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+        return bGridClient;
     }
 }
