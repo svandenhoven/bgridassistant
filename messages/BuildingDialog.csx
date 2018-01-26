@@ -26,6 +26,9 @@ public class BuildingDialog : LuisDialog<object>
     //{
     //}
 
+    protected string _lightSwitchState = "";
+    protected string _lightIntensity = "";
+
     public BuildingDialog() : base(new LuisService(new LuisModelAttribute(
     "bd1b92d3-076a-46c7-a1bb-2e10d9962f40",
     "8248c94c11e743c58e29411c0219734d",
@@ -52,7 +55,7 @@ public class BuildingDialog : LuisDialog<object>
             var promptText = "For which room do you want to know temperature?";
             var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
             var prompt = new PromptDialog.PromptString(promptOption);
-            context.Call<string>(prompt, this.ResumeAfterOrderRoomClarification);
+            context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderRoomClarification);
         }
     }
 
@@ -76,10 +79,46 @@ public class BuildingDialog : LuisDialog<object>
         }
         else
         {
-            var promptText = "For which room do you want to know temperature?";
-            var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
-            var prompt = new PromptDialog.PromptString(promptOption);
-            context.Call<string>(prompt, this.ResumeAfterOrderRoomClarification);
+            if (gotLightState)
+            {
+                _lightSwitchState = lightStateEntity.Entity;
+                var promptText = $"For which room do you want to switch light {_lightSwitchState}?";
+                var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+                var prompt = new PromptDialog.PromptString(promptOption);
+                context.Call<string>(prompt, this.ResumeLightSwitchAfterOrderRoomClarification);
+            }
+
+        }
+    }
+
+    [LuisIntent("DimLight")]
+    public async Task DimLight(IDialogContext context, LuisResult result)
+    {
+        EntityRecommendation roomEntity;
+        EntityRecommendation lightIntensityEntity;
+
+        var gotRoom = result.TryFindEntity("Room", out roomEntity);
+        var gotlightIntensity = result.TryFindEntity("LightIntensity", out lightIntensityEntity);
+
+        if (gotRoom && gotlightIntensity)
+        {
+            var roomId = roomEntity.Entity;
+            var lightIntensity = lightIntensityEntity.Entity;
+            var msg = await SetlightIntensity(roomId, lightIntensity);
+            await context.SayAsync(msg, msg);
+
+        }
+        else
+        {
+            if (gotlightIntensity)
+            {
+                _lightIntensity = lightIntensityEntity.Entity;
+                var promptText = $"For which room do you want to switch lightIntensity to {_lightIntensity} procent?";
+                var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+                var prompt = new PromptDialog.PromptString(promptOption);
+                context.Call<string>(prompt, this.ResumeDimLightAfterOrderRoomClarification);
+            }
+
         }
     }
 
@@ -165,14 +204,56 @@ public class BuildingDialog : LuisDialog<object>
         }
         else
         {
-            return $"Could not switch light";
+            return $"Could not switch light for {islandId}";
         }
     }
 
-    private async Task ResumeAfterOrderRoomClarification(IDialogContext context, IAwaitable<string> result)
+  
+    private async Task<string> SetlightIntensity(string islandId, string lightIntensity)
+    {
+        var bGridClient = GetHttpClient();
+        var obj = new
+        {
+            intensity = int.Parse(lightIntensity),
+            return_address = "localhost"
+        };
+
+        var json = JsonConvert.SerializeObject(obj);
+
+        var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var lightResponse = await bGridClient.PostAsync($"/api/islands/{islandId}/light/intensity", httpContent);
+        if (lightResponse.IsSuccessStatusCode)
+        {
+            return $"Set lightIntensity of {islandId} to {lightIntensity} procent.";
+
+        }
+        else
+        {
+            return $"Could not set lightIntensity for {islandId}";
+        }
+    }
+
+    private async Task ResumeGetTemperatureAfterOrderRoomClarification(IDialogContext context, IAwaitable<string> result)
     {
         var roomId = await result;
         var msg = await GetTemperature(roomId);
         await context.SayAsync(msg, msg);
     }
+
+    private async Task ResumeLightSwitchAfterOrderRoomClarification(IDialogContext context, IAwaitable<string> result)
+    {
+        var islandId = await result;
+        var msg = await SetLight(islandId, _lightSwitchState);
+        await context.SayAsync(msg, msg);
+    }
+
+    //
+    private async Task ResumeDimLightAfterOrderRoomClarification(IDialogContext context, IAwaitable<string> result)
+    {
+        var islandId = await result;
+        var msg = await SetlightIntensity(islandId, _lightIntensity);
+        await context.SayAsync(msg, msg);
+    }
+
 }
