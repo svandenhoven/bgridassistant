@@ -237,6 +237,7 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeGetTemperatureAfterOrderRoomClarification(IDialogContext context, IAwaitable<string> result)
     {
         var roomId = await result;
+        roomId = RemoveNonCharacters(roomId);
         var msg = await GetTemperature(roomId);
         await context.SayAsync(msg, msg);
     }
@@ -244,6 +245,7 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeLightSwitchAfterOrderRoomClarification(IDialogContext context, IAwaitable<string> result)
     {
         var islandId = await result;
+        islandId = RemoveNonCharacters(roomId);
         var msg = await SetLight(islandId, _lightSwitchState);
         await context.SayAsync(msg, msg);
     }
@@ -252,8 +254,15 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeDimLightAfterOrderRoomClarification(IDialogContext context, IAwaitable<string> result)
     {
         var islandId = await result;
+        islandId = RemoveNonCharacters(roomId);
         var msg = await SetlightIntensity(islandId, _lightIntensity);
         await context.SayAsync(msg, msg);
+    }
+
+    private string RemoveNonCharacters(string input)
+    {       
+        Regex rgx = new Regex("[^a-zA-Z0-9 -]");
+        return rgx.Replace(input, "");
     }
 
 }
