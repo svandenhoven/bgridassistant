@@ -40,3 +40,10 @@ public class bGridTemperature
     public int timestamp { get; set; }
     public float value { get; set; }
 }
+
+public class bGridMovement
+{
+    public int location_id { get; set; }
+    public int timestamp { get; set; }
+    public float value { get; set; }
+}

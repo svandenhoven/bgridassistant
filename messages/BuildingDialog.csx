@@ -13,6 +13,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
+using System.Text.RegularExpressions;
 
 
 // For more information about this template visit http://aka.ms/azurebots-csharp-luis
@@ -36,12 +37,22 @@ public class BuildingDialog : LuisDialog<object>
     {
     }
 
+    [LuisIntent("GetDeskInfo")]
+    public async Task GetDeskInfo(IDialogContext context, LuisResult result)
+    {
+        EntityRecommendation actionEntity;
+        var gotAction = result.TryFindEntity("Action", out actionEntity);
+
+        var deskId = actionEntity.Entity;
+        var msg = await GetDeskAvailability();
+        await context.SayAsync(msg, msg);
+    }
+
     [LuisIntent("GetTemperature")]
     public async Task GetTemperature(IDialogContext context, LuisResult result)
     {
-        EntityRecommendation DeskEntity;
-
-        var gotDesk = result.TryFindEntity("Desk", out DeskEntity);
+        EntityRecommendation deskEntity;
+        var gotDesk = result.TryFindEntity("Device", out deskEntity);
 
         if (gotDesk)
         {
@@ -55,7 +66,7 @@ public class BuildingDialog : LuisDialog<object>
             var promptText = "For which desk do you want to know temperature?";
             var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
             var prompt = new PromptDialog.PromptString(promptOption);
-            context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderRoomClarification);
+            context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderDeskClarification);
         }
     }
 
@@ -66,14 +77,14 @@ public class BuildingDialog : LuisDialog<object>
         EntityRecommendation deskEntity;
         EntityRecommendation lightStateEntity;
 
-        var gotDesk = result.TryFindEntity("Desk", out deskEntity);
+        var gotDevice = result.TryFindEntity("Device", out deskEntity);
         var gotLightState = result.TryFindEntity("LightStates", out lightStateEntity);
 
-        if (gotRoom && gotLightState)
+        if (gotDevice && gotLightState)
         {
-            var deskId = deskEntity.Entity;
+            var lightId = deskEntity.Entity;
             var lightState = lightStateEntity.Entity;
-            var msg = await SetLight(deskId, lightState);
+            var msg = await SetLight(lightId, lightState);
             await context.SayAsync(msg, msg);
 
         }
@@ -82,7 +93,7 @@ public class BuildingDialog : LuisDialog<object>
             if (gotLightState)
             {
                 _lightSwitchState = lightStateEntity.Entity;
-                var promptText = $"For which desk do you want to switch light {_lightSwitchState}?";
+                var promptText = $"Which light do you want to switch {_lightSwitchState}?";
                 var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
                 var prompt = new PromptDialog.PromptString(promptOption);
                 context.Call<string>(prompt, this.ResumeLightSwitchAfterOrderDeskClarification);
@@ -97,14 +108,14 @@ public class BuildingDialog : LuisDialog<object>
         EntityRecommendation deskEntity;
         EntityRecommendation lightIntensityEntity;
 
-        var gotDesk = result.TryFindEntity("Desk", out deskEntity);
+        var gotDevice = result.TryFindEntity("Device", out deskEntity);
         var gotlightIntensity = result.TryFindEntity("LightIntensity", out lightIntensityEntity);
 
-        if (gotDesk && gotlightIntensity)
+        if (gotDevice && gotlightIntensity)
         {
-            var deskId = deskEntity.Entity;
+            var lightId = deskEntity.Entity;
             var lightIntensity = lightIntensityEntity.Entity;
-            var msg = await SetlightIntensity(deskId, lightIntensity);
+            var msg = await SetlightIntensity(lightId, lightIntensity);
             await context.SayAsync(msg, msg);
 
         }
@@ -113,7 +124,7 @@ public class BuildingDialog : LuisDialog<object>
             if (gotlightIntensity)
             {
                 _lightIntensity = lightIntensityEntity.Entity;
-                var promptText = $"For which desk do you want to switch lightIntensity to {_lightIntensity} procent?";
+                var promptText = $"For which light do you want to switch intensity to {_lightIntensity} procent?";
                 var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
                 var prompt = new PromptDialog.PromptString(promptOption);
                 context.Call<string>(prompt, this.ResumeDimLightAfterOrderDeskClarification);
@@ -148,7 +159,7 @@ public class BuildingDialog : LuisDialog<object>
         await this.ShowLuisResult(context, result);
     }
 
-    private async Task ShowLuisResult(IDialogContext context, LuisResult result) 
+    private async Task ShowLuisResult(IDialogContext context, LuisResult result)
     {
         await context.PostAsync($"You have reached {result.Intents[0].Intent}. You said: {result.Query}");
         context.Wait(MessageReceived);
@@ -189,6 +200,57 @@ public class BuildingDialog : LuisDialog<object>
         }
     }
 
+    private async Task<string> GetDeskAvailability()
+    {
+        var msg = "";
+        var desks = await ExecuteAction<List<bGridMovement>>($"api/locations/recent/movement");
+
+        if (desks == null)
+            msg = "I could not retrieve available desks.";
+        else
+        {
+            if(desks.Count == 0)
+            {
+                msg = "I could not find any recent information on desks";
+            }
+            else
+            {
+                var availableDesks = desks.Where(d => d.value > 0);
+                if (availableDesks.Count() > 0)
+                    msg = $"Desk {availableDesks.Last().location_id} is available";
+                else
+                    msg = "No desks are available.";
+            }
+        }
+        return msg;
+        
+    }
+
+    private  static void DeskAvailabilitySuccess(List<bGridMovement> desks)
+    {
+        if(desks.Count > 0)
+        {
+
+        }
+    }
+
+    private async Task<T> ExecuteAction<T>(string action)
+    {
+        var bGridClient = GetHttpClient();
+        var response = await bGridClient.GetAsync(action);
+
+        if(response.IsSuccessStatusCode)
+        {
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var jsonObject = JsonConvert.DeserializeObject<T>(jsonString);
+            return jsonObject; 
+        }
+        else
+        {
+            return default(T);
+        }
+    }
+
     private async Task<string> SetLight(string islandId, string gotLightState)
     {
         var bGridClient = GetHttpClient();
@@ -208,7 +270,7 @@ public class BuildingDialog : LuisDialog<object>
         }
     }
 
-  
+
     private async Task<string> SetlightIntensity(string islandId, string lightIntensity)
     {
         var bGridClient = GetHttpClient();
@@ -245,7 +307,7 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeLightSwitchAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
     {
         var islandId = await result;
-        islandId = RemoveNonCharacters(deskId);
+        islandId = RemoveNonCharacters(islandId);
         var msg = await SetLight(islandId, _lightSwitchState);
         await context.SayAsync(msg, msg);
     }
@@ -254,13 +316,13 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeDimLightAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
     {
         var islandId = await result;
-        islandId = RemoveNonCharacters(deskId);
+        islandId = RemoveNonCharacters(islandId);
         var msg = await SetlightIntensity(islandId, _lightIntensity);
         await context.SayAsync(msg, msg);
     }
 
     private string RemoveNonCharacters(string input)
-    {       
+    {
         Regex rgx = new Regex("[^a-zA-Z0-9 -]");
         return rgx.Replace(input, "");
     }
