@@ -229,30 +229,33 @@ public class BuildingDialog : LuisDialog<object>
             msg = "I could not retrieve available desks.";
         else
         {
-            if(desks.Count == 0)
+            if (desks.Count == 0)
             {
                 msg = "I could not find any recent information on desks";
             }
             else
             {
-                var availableDesks = desks.Where(d => d.value == 0);
-                if (availableDesks.Count() > 0)
+                var availableDesksGroup = desks.Where(d => d.value == 0).GroupBy(d => d.location_id);
+                if (availableDesksGroup.Count() > 0)
                 {
-                    msg = $"Desk {availableDesks.Last().location_id} is available. ";
-                    msg += await GetTemperature(availableDesks.Last().location_id.ToString());
+                    foreach (IGrouping<int, bGridMovement> availableDesks in availableDesksGroup)
+                    {
+                        msg += $"Desk {availableDesks.Last().location_id} is available. ";
+                        msg += await GetTemperature(availableDesks.Last().location_id.ToString());
+                        msg += "  ";
+                    }
                 }
-
                 else
                     msg = "No desks are available.";
             }
         }
         return msg;
-        
+
     }
 
-    private  static void DeskAvailabilitySuccess(List<bGridMovement> desks)
+    private static void DeskAvailabilitySuccess(List<bGridMovement> desks)
     {
-        if(desks.Count > 0)
+        if (desks.Count > 0)
         {
 
         }
@@ -263,11 +266,11 @@ public class BuildingDialog : LuisDialog<object>
         var bGridClient = GetHttpClient();
         var response = await bGridClient.GetAsync(action);
 
-        if(response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode)
         {
             var jsonString = await response.Content.ReadAsStringAsync();
             var jsonObject = JsonConvert.DeserializeObject<T>(jsonString);
-            return jsonObject; 
+            return jsonObject;
         }
         else
         {
