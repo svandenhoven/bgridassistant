@@ -14,6 +14,7 @@ using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
 using System.Text.RegularExpressions;
+using System.Collections;
 
 
 // For more information about this template visit http://aka.ms/azurebots-csharp-luis
@@ -27,6 +28,8 @@ public class BuildingDialog : LuisDialog<object>
     //{
     //}
 
+    // todo: make smarter memory,  wih short & longterm memory
+    protected Hashtable memory = new Hashtable();
     protected string _lightSwitchState = "";
     protected string _lightIntensity = "";
 
@@ -35,6 +38,9 @@ public class BuildingDialog : LuisDialog<object>
     "8248c94c11e743c58e29411c0219734d",
     domain: "westeurope.api.cognitive.microsoft.com")))
     {
+        memory.Add("lightState", "");
+        memory.Add("lightIntensity", "");
+        memory.Add("lastDevice", "");
     }
 
     [LuisIntent("GetDeskInfo")]
@@ -44,6 +50,7 @@ public class BuildingDialog : LuisDialog<object>
         var gotAction = result.TryFindEntity("Action", out actionEntity);
 
         var deskId = actionEntity.Entity;
+
         var msg = await GetDeskAvailability();
         await context.SayAsync(msg, msg);
     }
@@ -63,10 +70,18 @@ public class BuildingDialog : LuisDialog<object>
         }
         else
         {
-            var promptText = "For which desk do you want to know temperature?";
-            var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
-            var prompt = new PromptDialog.PromptString(promptOption);
-            context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderDeskClarification);
+            if (memory["lastDevice"].ToString() != "")
+            {
+                var msg = await GetTemperature(memory["lastDevice"].ToString());
+                await context.SayAsync(msg, msg);
+            }
+            else
+            {
+                var promptText = "For which desk do you want to know temperature?";
+                var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+                var prompt = new PromptDialog.PromptString(promptOption);
+                context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderDeskClarification);
+            }
         }
     }
 
@@ -177,8 +192,13 @@ public class BuildingDialog : LuisDialog<object>
     }
     private async Task<string> GetTemperature(string deskId)
     {
-        var bGridClient = GetHttpClient();
+        //Write desk to memory for future use.
+        if (memory.ContainsKey("lastDevice"))
+            memory["lastDevice"] = deskId;
+        else
+            memory.Add("lastDevice", deskId);
 
+        var bGridClient = GetHttpClient();
         var tempResponse = await bGridClient.GetAsync($"api/locations/{deskId}/temperature");
         if (tempResponse.IsSuccessStatusCode)
         {
@@ -300,6 +320,7 @@ public class BuildingDialog : LuisDialog<object>
     {
         var deskId = await result;
         deskId = RemoveNonCharacters(deskId);
+
         var msg = await GetTemperature(deskId);
         await context.SayAsync(msg, msg);
     }
