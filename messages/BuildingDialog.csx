@@ -237,7 +237,11 @@ public class BuildingDialog : LuisDialog<object>
             {
                 var availableDesks = desks.Where(d => d.value == 0);
                 if (availableDesks.Count() > 0)
-                    msg = $"Desk {availableDesks.Last().location_id} is available.";
+                {
+                    msg = $"Desk {availableDesks.Last().location_id} is available {availableDesks.Last().value}. ";
+                    msg += GetTemperature(availableDesks.Last().location_id);
+                }
+
                 else
                     msg = "No desks are available.";
             }
