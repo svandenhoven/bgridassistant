@@ -49,7 +49,7 @@ public class BuildingDialog : LuisDialog<object>
         EntityRecommendation actionEntity;
         var gotAction = result.TryFindEntity("Action", out actionEntity);
 
-        var deskId = actionEntity.Entity;
+        //var actionId = actionEntity.Entity;
 
         var msg = await GetDeskAvailability();
         await context.SayAsync(msg, msg);
@@ -235,9 +235,9 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                var availableDesks = desks.Where(d => d.value > 0);
+                var availableDesks = desks.Where(d => d.value == 0);
                 if (availableDesks.Count() > 0)
-                    msg = $"Desk {availableDesks.Last().location_id} is available";
+                    msg = $"Desk {availableDesks.Last().location_id} is available.";
                 else
                     msg = "No desks are available.";
             }
