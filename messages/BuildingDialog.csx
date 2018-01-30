@@ -160,7 +160,7 @@ public class BuildingDialog : LuisDialog<object>
     [LuisIntent("Greeting")]
     public async Task GreetingIntent(IDialogContext context, LuisResult result)
     {
-        var msg = "Hi. This is building bot. You can ask temperature, availability and switch lights?";
+        var msg = "Hi. This is building bot. You can ask temperature, availability and switch lights.";
         await context.SayAsync(msg, msg);
     }
 
@@ -242,7 +242,7 @@ public class BuildingDialog : LuisDialog<object>
                 var availableDesksGroup = desks.Where(d => d.value == 0).GroupBy(d => d.location_id);
                 if (availableDesksGroup.Count() > 0)
                 {
-                    int i = 0;
+                    int i = 1;
                     msg += "Desk";
                     msg += (availableDesksGroup.Count() > 1) ? "s " : " ";
                     foreach (IGrouping<int, bGridMovement> availableDesks in availableDesksGroup)
