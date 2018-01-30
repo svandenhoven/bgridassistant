@@ -30,8 +30,6 @@ public class BuildingDialog : LuisDialog<object>
 
     // todo: make smarter memory,  wih short & longterm memory
     protected Hashtable memory = new Hashtable();
-    protected string _lightSwitchState = "";
-    protected string _lightIntensity = "";
 
     public BuildingDialog() : base(new LuisService(new LuisModelAttribute(
     "bd1b92d3-076a-46c7-a1bb-2e10d9962f40",
@@ -151,7 +149,8 @@ public class BuildingDialog : LuisDialog<object>
     [LuisIntent("None")]
     public async Task NoneIntent(IDialogContext context, LuisResult result)
     {
-        await this.ShowLuisResult(context, result);
+        var msg = "No clear what you mean. Can you rephrase?";
+        await context.SayAsync(msg, msg);
     }
 
     // Go to https://luis.ai and create a new intent, then train/publish your luis app.
@@ -159,19 +158,22 @@ public class BuildingDialog : LuisDialog<object>
     [LuisIntent("Greeting")]
     public async Task GreetingIntent(IDialogContext context, LuisResult result)
     {
-        await this.ShowLuisResult(context, result);
+        var msg = "Hi. This is building bot. You can ask temperature, availability and switch lights?";
+        await context.SayAsync(msg, msg);
     }
 
     [LuisIntent("Cancel")]
     public async Task CancelIntent(IDialogContext context, LuisResult result)
     {
-        await this.ShowLuisResult(context, result);
+        var msg = "This cancel action is not implemented";
+        await context.SayAsync(msg, msg);
     }
 
     [LuisIntent("Help")]
     public async Task HelpIntent(IDialogContext context, LuisResult result)
     {
-        await this.ShowLuisResult(context, result);
+        var msg = "This is building bot. You can ask temperature, availability and switch lights?";
+        await context.SayAsync(msg, msg);
     }
 
     private async Task ShowLuisResult(IDialogContext context, LuisResult result)
@@ -238,12 +240,14 @@ public class BuildingDialog : LuisDialog<object>
                 var availableDesksGroup = desks.Where(d => d.value == 0).GroupBy(d => d.location_id);
                 if (availableDesksGroup.Count() > 0)
                 {
+                    msg += "Desk" + availableDesksGroup.Count() > 1 ? "s " : " ";
                     foreach (IGrouping<int, bGridMovement> availableDesks in availableDesksGroup)
                     {
-                        msg += $"Desk {availableDesks.Last().location_id} is available. ";
-                        msg += await GetTemperature(availableDesks.Last().location_id.ToString());
-                        msg += "  ";
+                        msg += availableDesks.Last().location_id + " ";
                     }
+                    msg += "Desk" + availableDesksGroup.Count() > 1 ? "are " : "is" + " available ";
+
+                    //msg += await GetTemperature(availableDesks.Last().location_id.ToString());
                 }
                 else
                     msg = "No desks are available.";
