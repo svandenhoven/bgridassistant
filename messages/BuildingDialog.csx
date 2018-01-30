@@ -242,14 +242,16 @@ public class BuildingDialog : LuisDialog<object>
                 var availableDesksGroup = desks.Where(d => d.value == 0).GroupBy(d => d.location_id);
                 if (availableDesksGroup.Count() > 0)
                 {
+                    int i = 0;
                     msg += "Desk";
                     msg += (availableDesksGroup.Count() > 1) ? "s " : " ";
                     foreach (IGrouping<int, bGridMovement> availableDesks in availableDesksGroup)
                     {
-                        msg += availableDesks.Last().location_id + " ";
+                        msg += availableDesks.Last().location_id;
+                        msg += (i < availableDesksGroup.Count()) ? ", " : " ";
                     }
                     msg += (availableDesksGroup.Count() > 1) ? "are " : "is";
-                    msg += " available ";
+                    msg += " available.";
 
                     //msg += await GetTemperature(availableDesks.Last().location_id.ToString());
                 }
