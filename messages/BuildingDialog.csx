@@ -174,7 +174,7 @@ public class BuildingDialog : LuisDialog<object>
     [LuisIntent("Help")]
     public async Task HelpIntent(IDialogContext context, LuisResult result)
     {
-        var msg = "This is building bot. You can ask temperature, availability and switch lights?";
+        var msg = "This is building bot. You can ask temperature, availability and switch lights.";
         await context.SayAsync(msg, msg);
     }
 
@@ -249,6 +249,7 @@ public class BuildingDialog : LuisDialog<object>
                     {
                         msg += availableDesks.Last().location_id;
                         msg += (i < availableDesksGroup.Count()) ? ", " : " ";
+                        i++;
                     }
                     msg += (availableDesksGroup.Count() > 1) ? "are " : "is";
                     msg += " available.";
