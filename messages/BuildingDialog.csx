@@ -30,6 +30,8 @@ public class BuildingDialog : LuisDialog<object>
 
     // todo: make smarter memory,  wih short & longterm memory
     protected Hashtable memory = new Hashtable();
+    protected string _lightSwitchState = "";
+    protected string _lightIntensity = "";
 
     public BuildingDialog() : base(new LuisService(new LuisModelAttribute(
     "bd1b92d3-076a-46c7-a1bb-2e10d9962f40",
@@ -240,12 +242,14 @@ public class BuildingDialog : LuisDialog<object>
                 var availableDesksGroup = desks.Where(d => d.value == 0).GroupBy(d => d.location_id);
                 if (availableDesksGroup.Count() > 0)
                 {
-                    msg += "Desk" + availableDesksGroup.Count() > 1 ? "s " : " ";
+                    msg += "Desk";
+                    msg += (availableDesksGroup.Count() > 1) ? "s " : " ";
                     foreach (IGrouping<int, bGridMovement> availableDesks in availableDesksGroup)
                     {
                         msg += availableDesks.Last().location_id + " ";
                     }
-                    msg += "Desk" + availableDesksGroup.Count() > 1 ? "are " : "is" + " available ";
+                    msg += (availableDesksGroup.Count() > 1) ? "are " : "is";
+                    msg += " available ";
 
                     //msg += await GetTemperature(availableDesks.Last().location_id.ToString());
                 }
