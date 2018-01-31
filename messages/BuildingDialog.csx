@@ -41,6 +41,7 @@ public class BuildingDialog : LuisDialog<object>
         memory.Add("lightState", "");
         memory.Add("lightIntensity", "");
         memory.Add("lastDevice", "");
+        memory.Add("lastAsset", "");
     }
 
     [LuisIntent("GetDeskInfo")]
@@ -59,6 +60,36 @@ public class BuildingDialog : LuisDialog<object>
         {
             msg = await GetOfficeOccupancy();
             await context.SayAsync(msg, msg);
+        }
+    }
+
+    [LuisIntent("FindAsset")]
+    public async Task FindAsset(IDialogContext context, LuisResult result)
+    {
+        EntityRecommendation entity;
+        var gotEntity = result.TryFindEntity("Asset", out entity);
+
+        if (gotEntity)
+        {
+            var entityValue = entity.Entity;
+            var msg = await FindAsset(entityValue);
+            await context.SayAsync(msg, msg);
+
+        }
+        else
+        {
+            if (memory["lastAsset"].ToString() != "")
+            {
+                var msg = await FindAsset(memory["lastAsset"].ToString());
+                await context.SayAsync(msg, msg);
+            }
+            else
+            {
+                var promptText = "Which asset do you want to find?";
+                var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+                var prompt = new PromptDialog.PromptString(promptOption);
+                context.Call<string>(prompt, this.ResumeFindAfterAssetClarification);
+            }
         }
     }
 
@@ -201,6 +232,28 @@ public class BuildingDialog : LuisDialog<object>
         bGridClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
         return bGridClient;
     }
+
+    private async Task<string> FindAsset(string assetId)
+    {
+        //Write desk to memory for future use.
+        if (memory.ContainsKey("lastAsset"))
+            memory["lastAsset"] = assetId;
+        else
+            memory.Add("lastAsset", assetId);
+
+        var msg = "";
+        var asset = await ExecuteAction<bGridAsset>($"/api/assets/{assetId}");
+        if(asset != null)
+        {
+            msg = $"Asset {assetId} can be found at {asset.x.ToString()},{asset.y.ToString()}";
+        }
+        else
+        {
+            msg = $"Cannot find location of asset {assetId}";
+        }
+        return msg;
+    }
+
     private async Task<string> GetTemperature(string deskId)
     {
         //Write desk to memory for future use.
@@ -233,7 +286,7 @@ public class BuildingDialog : LuisDialog<object>
 
 
 
-        private async Task GetDeskOccupancy(IDialogContext context, string deskId)
+    private async Task GetDeskOccupancy(IDialogContext context, string deskId)
     {
         //Write desk to memory for future use.
         if (memory.ContainsKey("lastDevice"))
@@ -308,14 +361,6 @@ public class BuildingDialog : LuisDialog<object>
         }
         return msg;
 
-    }
-
-    private static void DeskAvailabilitySuccess(List<bGridMovement> desks)
-    {
-        if (desks.Count > 0)
-        {
-
-        }
     }
 
     private async Task<T> ExecuteAction<T>(string action)
@@ -423,6 +468,14 @@ public class BuildingDialog : LuisDialog<object>
         var islandId = await result;
         islandId = RemoveNonCharacters(islandId);
         var msg = await SetlightIntensity(islandId, _lightIntensity);
+        await context.SayAsync(msg, msg);
+    }
+
+    private async Task ResumeFindAfterAssetClarification(IDialogContext context, IAwaitable<string> result)
+    {
+        var assetId = await result;
+        assetId = RemoveNonCharacters(assetId);
+        var msg = await FindAsset(assetId);
         await context.SayAsync(msg, msg);
     }
 
