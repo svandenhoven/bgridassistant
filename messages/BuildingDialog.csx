@@ -386,7 +386,7 @@ public class BuildingDialog : LuisDialog<object>
     {
         var confirm = await result;
         string[] answers = { "ok", "yes", "sure" };
-        if (answers.Contains(confirm))
+        if (answers.Contains(confirm.ToLower()))
         {
             var deskId = memory["lastDevice"].ToString();
 
