@@ -256,7 +256,7 @@ public class BuildingDialog : LuisDialog<object>
             {
                 var msg = (occupancyInfo.value == 0) ? $"Yes, desk {deskId} is available." : $"No, desk {deskId} is not available.";
                 //await context.SayAsync(msg, msg);
-                var promptText = msg + $" Do you more information of desk {deskId}?";
+                var promptText = msg + $" Do you want more information of desk {deskId}?";
                 var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
                 var prompt = new PromptDialog.PromptString(promptOption);
                 context.Call<string>(prompt, this.ResumeGetTemperatureAfterMoreInfoConfirmation);
