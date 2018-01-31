@@ -393,6 +393,11 @@ public class BuildingDialog : LuisDialog<object>
             var msg = await GetTemperature(deskId);
             await context.SayAsync(msg, msg);
         }
+        else
+        {
+            var msg = "Ok, just ask if you need more info.";
+            await context.SayAsync(msg, msg);
+        }
     }
 
     private async Task ResumeGetTemperatureAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
