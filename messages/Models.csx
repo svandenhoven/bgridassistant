@@ -23,7 +23,7 @@ public class ParkingStatus
             return Trend.ToString();
         }
     }
-    public IEnumerable<ParkingPlace> ParkingPlaces;
+    public IEnumerable<ParkingPlace> ParkingPlaces { get; set; }
 
 }
 
@@ -47,3 +47,13 @@ public class bGridMovement
     public int timestamp { get; set; }
     public float value { get; set; }
 }
+
+
+public class bGridOccpancy
+{
+    public int id { get; set; }
+    public int location_id { get; set; }
+    public int timestamp { get; set; }
+    public int value { get; set; }
+}
+

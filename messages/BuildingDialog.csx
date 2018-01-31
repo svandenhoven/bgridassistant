@@ -46,13 +46,20 @@ public class BuildingDialog : LuisDialog<object>
     [LuisIntent("GetDeskInfo")]
     public async Task GetDeskInfo(IDialogContext context, LuisResult result)
     {
-        EntityRecommendation actionEntity;
-        var gotAction = result.TryFindEntity("Action", out actionEntity);
+        EntityRecommendation deskEntity;
+        var gotDesk = result.TryFindEntity("Device", out deskEntity);
+        var msg = "";
 
-        //var actionId = actionEntity.Entity;
-
-        var msg = await GetDeskAvailability();
-        await context.SayAsync(msg, msg);
+        if (gotDesk)
+        {
+            var deskId = deskEntity.Entity;
+            await GetDeskOccupancy(context, deskId);
+        }
+        else
+        {
+            msg = await GetOfficeOccupancy();
+            await context.SayAsync(msg, msg);
+        }
     }
 
     [LuisIntent("GetTemperature")]
@@ -224,10 +231,48 @@ public class BuildingDialog : LuisDialog<object>
         }
     }
 
-    private async Task<string> GetDeskAvailability()
+
+
+        private async Task GetDeskOccupancy(IDialogContext context, string deskId)
+    {
+        //Write desk to memory for future use.
+        if (memory.ContainsKey("lastDevice"))
+            memory["lastDevice"] = deskId;
+        else
+            memory.Add("lastDevice", deskId);
+
+        var bGridClient = GetHttpClient();
+        var occupancyResponse = await bGridClient.GetAsync($"/api/occupancy/office/{deskId}");
+        if (occupancyResponse.IsSuccessStatusCode)
+        {
+            var json = await occupancyResponse.Content.ReadAsStringAsync();
+            var occupancyInfo = JsonConvert.DeserializeObject<bGridOccpancy>(json);
+            if (occupancyInfo == null)
+            {
+                var msg = $"I do not have information on desk {deskId} for you.";
+                await context.SayAsync(msg, msg); 
+            }
+            else
+            {
+                var msg = (occupancyInfo.value == 0) ? $"Yes, desk {deskId} is available." : $"No, desk {deskId} is not available.";
+                await context.SayAsync(msg, msg);
+                var promptText = $"Do you more information of desk {deskId}?";
+                var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+                var prompt = new PromptDialog.PromptString(promptOption);
+                context.Call<string>(prompt, this.ResumeGetTemperatureAfterMoreInfoConfirmation);
+            }
+        }
+        else
+        {
+            var msg = $"Could not retrieve occupancy for {deskId}.";
+            await context.SayAsync(msg, msg);
+        }
+    }
+
+    private async Task<string> GetOfficeOccupancy()
     {
         var msg = "";
-        var desks = await ExecuteAction<List<bGridMovement>>($"api/locations/recent/movement");
+        var desks = await ExecuteAction<List<bGridOccpancy>>($"/api/occupancy/office/");
 
         if (desks == null)
             msg = "I could not retrieve available desks.";
@@ -239,19 +284,20 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                var availableDesksGroup = desks.Where(d => d.value == 0).GroupBy(d => d.location_id);
-                if (availableDesksGroup.Count() > 0)
+                int[] workplaces = { 416, 417, 1007, 1008, 1009, 1010, 1011 };
+                var availableDesks = desks.Where(d => d.value == 0 && workplaces.Contains(d.location_id));
+                if (availableDesks.Count() > 0)
                 {
                     int i = 1;
                     msg += "Desk";
-                    msg += (availableDesksGroup.Count() > 1) ? "s " : " ";
-                    foreach (IGrouping<int, bGridMovement> availableDesks in availableDesksGroup)
+                    msg += (availableDesks.Count() > 1) ? "s " : " ";
+                    foreach (var desk in availableDesks)
                     {
-                        msg += availableDesks.Last().location_id;
-                        msg += (i < availableDesksGroup.Count()) ? ", " : " ";
+                        msg += desk.location_id;
+                        msg += (i < availableDesks.Count()) ? " and " : " ";
                         i++;
                     }
-                    msg += (availableDesksGroup.Count() > 1) ? "are " : "is";
+                    msg += (availableDesks.Count() > 1) ? "are " : "is";
                     msg += " available.";
 
                     //msg += await GetTemperature(availableDesks.Last().location_id.ToString());
@@ -331,6 +377,21 @@ public class BuildingDialog : LuisDialog<object>
         else
         {
             return $"Could not set lightIntensity for {islandId}";
+        }
+    }
+
+
+
+    private async Task ResumeGetTemperatureAfterMoreInfoConfirmation(IDialogContext context, IAwaitable<string> result)
+    {
+        var confirm = await result;
+        string[] answers = { "ok", "yes", "sure" };
+        if (answers.Contains(confirm))
+        {
+            var deskId = memory["lastDevice"].ToString();
+
+            var msg = await GetTemperature(deskId);
+            await context.SayAsync(msg, msg);
         }
     }
 
