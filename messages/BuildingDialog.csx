@@ -153,6 +153,11 @@ public class BuildingDialog : LuisDialog<object>
                 var prompt = new PromptDialog.PromptString(promptOption);
                 context.Call<string>(prompt, this.ResumeLightSwitchAfterOrderDeskClarification);
             }
+            else
+            {
+                var msg = "Please mention to switch light on or off";
+                await context.SayAsync(msg, msg);
+            }
 
         }
     }
@@ -183,6 +188,11 @@ public class BuildingDialog : LuisDialog<object>
                 var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
                 var prompt = new PromptDialog.PromptString(promptOption);
                 context.Call<string>(prompt, this.ResumeDimLightAfterOrderDeskClarification);
+            }
+            else
+            {
+                var msg = "Please mention to what percentage to dim lights.";
+                await context.SayAsync(msg, msg);
             }
 
         }
