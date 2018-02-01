@@ -237,12 +237,16 @@ public class BuildingDialog : LuisDialog<object>
 
     private List<bGridRectangles> CreateSpots()
     {
+        var scale = 1; //Todo: Add to config
         var spots = new List<bGridRectangles>();
         for(var x = -1; x<=10; x++)
         {
             for(var y=-1; y<=20; y++)
             {
-                spots.Add(new bGridRectangles { Name = ((char)(65+x)).ToString() + y.ToString(), Spot = new bGridRectangle(x*100, y*100, (x+1)*100, (y+1)*100) });
+                spots.Add(new bGridRectangles {
+                    Name = ((char)(65+x)).ToString() + y.ToString(),
+                    Spot = new bGridRectangle(x* scale, y* scale, (x+1)* scale, (y+1)* scale)
+                });
             }
         }    
 
