@@ -1,4 +1,5 @@
 #r "Newtonsoft.Json"
+#r "System.Drawing"
 #load "Models.csx"
 
 using System;
@@ -15,6 +16,7 @@ using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
 using System.Text.RegularExpressions;
 using System.Collections;
+using System.Drawing;
 
 
 // For more information about this template visit http://aka.ms/azurebots-csharp-luis
@@ -233,6 +235,36 @@ public class BuildingDialog : LuisDialog<object>
         return bGridClient;
     }
 
+    private List<bGridRectangles> CreateSpots()
+    {
+        var spots = new List<bGridRectangles>();
+        for(var x = -1; x<=10; x++)
+        {
+            for(var y=-1; y<=20; y++)
+            {
+                spots.Add(new bGridRectangles { Name = ((char)(65+x)).ToString() + y.ToString(), Spot = new bGridRectangle(x*100, y*100, (x+1)*100, (y+1)*100) });
+            }
+        }    
+
+        return spots;
+    }
+
+    private string FindSpot(Point pt)
+    {
+        var spotName = "";
+        var spots = CreateSpots();
+        foreach(var s in spots)
+        {
+            if (pt.X >= s.Spot.X1 && pt.X < s.Spot.X2 && pt.Y >= s.Spot.Y1 && pt.Y < s.Spot.Y2)
+            {
+                spotName = s.Name;
+                break;
+            }
+        }
+
+        return spotName;
+    }
+
     private async Task<string> FindAsset(string assetId)
     {
         //Write desk to memory for future use.
@@ -245,7 +277,13 @@ public class BuildingDialog : LuisDialog<object>
         var asset = await ExecuteAction<bGridAsset>($"/api/assets/{assetId}");
         if(asset != null)
         {
-            msg = $"Asset {assetId} can be found at {asset.x.ToString()},{asset.y.ToString()}";
+            Point pt = new Point(Convert.ToInt32(asset.x), Convert.ToInt32(asset.y));
+            var spot = FindSpot(pt);
+
+            if (spot != "")
+                msg = $"Asset {assetId} can be found at in square {spot}.";
+            else
+                msg = $"Asset {assetId} can be found at {asset.x.ToString()},{asset.y.ToString()}.";
         }
         else
         {
