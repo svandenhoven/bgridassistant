@@ -281,7 +281,7 @@ public class BuildingDialog : LuisDialog<object>
             var spot = FindSpot(pt);
 
             if (spot != "")
-                msg = $"Asset {assetId} can be found at in square {spot}.";
+                msg = $"Asset {assetId} can be found at in square {spot} ({asset.x.ToString()},{asset.y.ToString()}).";
             else
                 msg = $"Asset {assetId} can be found at {asset.x.ToString()},{asset.y.ToString()}.";
         }
