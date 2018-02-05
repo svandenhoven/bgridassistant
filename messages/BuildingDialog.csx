@@ -187,7 +187,7 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                _lightIntensity = 25;
+                _lightIntensity = "25";
             }
             var promptText = $"For which light do you want to switch intensity to {_lightIntensity} procent?";
             var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
