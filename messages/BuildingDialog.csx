@@ -184,16 +184,15 @@ public class BuildingDialog : LuisDialog<object>
             if (gotlightIntensity)
             {
                 _lightIntensity = lightIntensityEntity.Entity;
-                var promptText = $"For which light do you want to switch intensity to {_lightIntensity} procent?";
-                var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
-                var prompt = new PromptDialog.PromptString(promptOption);
-                context.Call<string>(prompt, this.ResumeDimLightAfterOrderDeskClarification);
             }
             else
             {
-                var msg = "Please mention to what percentage to dim lights.";
-                await context.SayAsync(msg, msg);
+                _lightIntensity = 25;
             }
+            var promptText = $"For which light do you want to switch intensity to {_lightIntensity} procent?";
+            var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+            var prompt = new PromptDialog.PromptString(promptOption);
+            context.Call<string>(prompt, this.ResumeDimLightAfterOrderDeskClarification);
 
         }
     }
@@ -297,7 +296,7 @@ public class BuildingDialog : LuisDialog<object>
             if (spot != "")
                 msg = $"Asset {assetId} can be found at in square {spot} ({asset.x.ToString()},{asset.y.ToString()}).";
             else
-                msg = $"Asset {assetId} can be found at {asset.x.ToString()},{asset.y.ToString()}.";
+                msg = $"Asset {assetId} can be found at coordinate {asset.x.ToString()},{asset.y.ToString()}.";
         }
         else
         {
@@ -389,7 +388,7 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                int[] workplaces = { 416, 417, 1007, 1008, 1009, 1010, 1011 };
+                int[] workplaces = { 1007, 1008, 1009, 1010, 1011 };
                 var availableDesks = desks.Where(d => d.value == 0 && workplaces.Contains(d.location_id));
                 if (availableDesks.Count() > 0)
                 {
