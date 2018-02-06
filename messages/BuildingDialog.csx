@@ -223,7 +223,7 @@ public class BuildingDialog : LuisDialog<object>
     [LuisIntent("Help")]
     public async Task HelpIntent(IDialogContext context, LuisResult result)
     {
-        var msg = "This is building bot. You can ask temperature, availability and switch lights.";
+        var msg = "This is building bot. You can ask temperature, occupancy and switch lights.";
         await context.SayAsync(msg, msg);
     }
 
@@ -248,12 +248,12 @@ public class BuildingDialog : LuisDialog<object>
     {
         var scale = 1; //Todo: Add to config
         var spots = new List<bGridRectangles>();
-        for(var x = -1; x<=10; x++)
+        for(var x = -1; x<=11; x++)
         {
-            for(var y=-1; y<=20; y++)
+            for(var y=-1; y<=26; y++)
             {
                 spots.Add(new bGridRectangles {
-                    Name = ((char)(65+x)).ToString() + y.ToString(),
+                    Name = x.ToString() + ", " + y.ToString(),
                     Spot = new bGridRectangle(x* scale, y* scale, (x+1)* scale, (y+1)* scale)
                 });
             }
@@ -262,13 +262,13 @@ public class BuildingDialog : LuisDialog<object>
         return spots;
     }
 
-    private string FindSpot(Point pt)
+    private string FindSpot(double x, double y)
     {
         var spotName = "";
         var spots = CreateSpots();
         foreach(var s in spots)
         {
-            if (pt.X >= s.Spot.X1 && pt.X < s.Spot.X2 && pt.Y >= s.Spot.Y1 && pt.Y < s.Spot.Y2)
+            if (x >= s.Spot.X1 && x < s.Spot.X2 && y >= s.Spot.Y1 && y < s.Spot.Y2)
             {
                 spotName = s.Name;
                 break;
@@ -290,13 +290,15 @@ public class BuildingDialog : LuisDialog<object>
         var asset = await ExecuteAction<bGridAsset>($"/api/assets/{assetId}");
         if(asset != null)
         {
-            Point pt = new Point(Convert.ToInt32(asset.x), Convert.ToInt32(asset.y));
-            var spot = FindSpot(pt);
+            var x = Convert.ToInt32(asset.x) + 91.5;
+            var y = 36.5 - Convert.ToInt32(asset.y);
+            
+            var spot = FindSpot(x,y);
 
             if (spot != "")
-                msg = $"Asset {assetId} can be found at in square {spot} ({asset.x.ToString()},{asset.y.ToString()}).";
+                msg = $"Asset {assetId} can be found at in square {spot}.";
             else
-                msg = $"Asset {assetId} can be found at coordinate {asset.x.ToString()},{asset.y.ToString()}.";
+                msg = $"Asset {assetId} can be found at coordinate {x.ToString()}, {y.ToString()}.";
         }
         else
         {
