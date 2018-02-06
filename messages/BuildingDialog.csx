@@ -87,7 +87,7 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                var promptText = "Which asset do you want to find?";
+                var promptText = "Did not heard a know asset, which asset do you want to find?";
                 var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
                 var prompt = new PromptDialog.PromptString(promptOption);
                 context.Call<string>(prompt, this.ResumeFindAfterAssetClarification);
