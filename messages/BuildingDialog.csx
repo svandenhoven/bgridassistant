@@ -528,7 +528,8 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeGetTemperatureAfterMoreInfoConfirmation(IDialogContext context, IAwaitable<string> result)
     {
         var confirm = await result;
-        confirm.Replace(".", "");
+        confirm = confirm.Replace(".", "");
+        
         string[] answers = { "ok", "yes", "sure" };
         if (answers.Contains(confirm.ToLower()))
         {
