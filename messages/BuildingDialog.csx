@@ -103,7 +103,7 @@ public class BuildingDialog : LuisDialog<object>
         if(hasProduct)
         {
             var product = entity.Entity;
-            var msg = $"I will order {product} for you. I will arrive in 15 minutes.";
+            var msg = $"I will order {product} for you. The {product} will arrive in 15 minutes.";
             await context.SayAsync(msg, msg);
         }
         else
