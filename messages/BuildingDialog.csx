@@ -377,7 +377,9 @@ public class BuildingDialog : LuisDialog<object>
                 var temp = tempInfo.Last();
                 var msg =  $"The temperature in {deskId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
                 if (cloudLevel < 25)
-                    msg = msg + " It will be sunny today, so room might get warm in afternoon.";
+                    msg = msg + $" It will be sunny today, so desk {deskId} might get warm in afternoon because it is on the southside of the building.";
+                else
+                    msg = msg + $" It will not be very sunny todat, so desk {deskId} will stay cool.";
                 return msg;
             }
         }
