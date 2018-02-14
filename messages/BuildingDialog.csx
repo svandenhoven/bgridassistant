@@ -530,7 +530,7 @@ public class BuildingDialog : LuisDialog<object>
         var confirm = await result;
         confirm = confirm.Replace(".", "");
         
-        string[] answers = { "ok", "yes", "sure" };
+        string[] answers = { "ok", "yes", "sure", "yeah" };
         if (answers.Contains(confirm.ToLower()))
         {
             var deskId = memory["lastDevice"].ToString();
