@@ -379,7 +379,7 @@ public class BuildingDialog : LuisDialog<object>
                 if (cloudLevel < 25)
                     msg = msg + $" It will be sunny today, so desk {deskId} might get warm in afternoon because it is on the southside of the building.";
                 else
-                    msg = msg + $" It will not be very sunny todat, so desk {deskId} will stay cool.";
+                    msg = msg + $" It will not be very sunny today, so desk {deskId} will stay cool.";
                 return msg;
             }
         }
