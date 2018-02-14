@@ -152,6 +152,17 @@ public class BuildingDialog : LuisDialog<object>
                 var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
                 var prompt = new PromptDialog.PromptString(promptOption);
                 context.Call<string>(prompt, this.ResumeLightSwitchAfterOrderDeskClarification);
+
+
+                //var lights = new ArrayList<string> { "1002", "1003", "1004", "1005", "1006" };
+                //foreach(var light in lights)
+                //{
+                //    var msgTemp = await SetLight(islandId, _lightSwitchState);
+                //}
+
+                //var msg = $"Switched all lights {_lightSwitchState}.";
+                //await context.SayAsync(msg, msg);
+
             }
             else
             {
@@ -193,6 +204,15 @@ public class BuildingDialog : LuisDialog<object>
             var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
             var prompt = new PromptDialog.PromptString(promptOption);
             context.Call<string>(prompt, this.ResumeDimLightAfterOrderDeskClarification);
+
+            //var lights = new ArrayList<string> { "1002", "1003", "1004", "1005", "1006" };
+            //foreach (var light in lights)
+            //{
+            //    var msgTemp = await SetlightIntensity(islandId, _lightIntensity);
+            //}
+
+            //var msg = $"Dimmed all lights to {_lightIntensity} percent.";
+            //await context.SayAsync(msg, msg);
 
         }
     }
@@ -390,7 +410,7 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                int[] workplaces = { 1007, 1008, 1009, 1010, 1011 };
+                int[] workplaces = { 416, 417 };
                 var availableDesks = desks.Where(d => d.value == 0 && workplaces.Contains(d.location_id));
                 if (availableDesks.Count() > 0)
                 {
