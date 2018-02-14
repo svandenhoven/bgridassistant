@@ -335,6 +335,8 @@ public class BuildingDialog : LuisDialog<object>
         else
             memory.Add("lastDevice", deskId);
 
+        var cloudLevel = await GetWeather();
+
         var bGridClient = GetHttpClient();
         var tempResponse = await bGridClient.GetAsync($"api/locations/{deskId}/temperature");
         if (tempResponse.IsSuccessStatusCode)
@@ -348,7 +350,10 @@ public class BuildingDialog : LuisDialog<object>
             else
             {
                 var temp = tempInfo.Last();
-                return $"The temperature in {deskId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
+                var msg =  $"The temperature in {deskId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
+                if (cloudLevel < 25)
+                    msg = msg + " It will be sunny today, so room might get warm in afternoon.";
+                return msg;
             }
         }
         else
@@ -357,7 +362,27 @@ public class BuildingDialog : LuisDialog<object>
         }
     }
 
+    private async Task<int> GetWeather()
+    {
+        var client = new HttpClient
+        {
+            BaseAddress = new Uri("http://mindparkfacilityapi.azurewebsites.net/")
+        };
 
+        var response = await client.GetAsync("Api/weather?city=amsterdam");
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            var weatherInfo = JsonConvert.DeserializeObject<WeatherInfo>(json);
+            return weatherInfo.clouds.all;
+
+        }
+        else
+        {
+            return 100;
+        }
+
+    }
 
     private async Task GetDeskOccupancy(IDialogContext context, string deskId)
     {
