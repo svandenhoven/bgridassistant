@@ -26,7 +26,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "messages", "messages", "{F4D9DF3B-F4E4-4E19-9053-3AF71A3189FA}"
 	ProjectSection(SolutionItems) = preProject
 		messages\BuildingDialog.csx = messages\BuildingDialog.csx
-		messages\EchoDialog.csx = messages\EchoDialog.csx
 		messages\function.json = messages\function.json
 		messages\Models.csx = messages\Models.csx
 		messages\project.json = messages\project.json

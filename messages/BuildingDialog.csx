@@ -217,6 +217,13 @@ public class BuildingDialog : LuisDialog<object>
         }
     }
 
+    [LuisIntent("Parking")]
+    public async Task ParkingIntent(IDialogContext context, LuisResult result)
+    {
+        var msg = await GetParking();
+        await context.SayAsync(msg, msg);
+    }
+
     [LuisIntent("None")]
     public async Task NoneIntent(IDialogContext context, LuisResult result)
     {
@@ -380,6 +387,30 @@ public class BuildingDialog : LuisDialog<object>
         else
         {
             return 100;
+        }
+
+    }
+
+    private async Task<string> GetParking()
+    {
+        var client = new HttpClient
+        {
+            BaseAddress = new Uri("http://mindparkfacilityapi.azurewebsites.net/")
+        };
+
+        var response = await client.GetAsync("api/parking/1");
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            var parkingInfo = JsonConvert.DeserializeObject<ParkingSpots>(json);
+            var msg = $"There are {parkingInfo.Current} spots available and that is {parkingInfo.TrendString}.";
+            msg += (parkingInfo.RemainingMinutes > 60) ? " It takes more than one hour to fill." : $" It will take {parkingInfo.RemainingMinutes} minutes to fill.";
+            return msg;
+
+        }
+        else
+        {
+            return "I am not able to get parking information.";
         }
 
     }

@@ -1,40 +1,6 @@
 using System;
 
-public enum ParkTrend
-{
-    Stable,
-    FillingSlow,
-    FillingFast,
-    EmptyingSlow,
-    EmptyingFast
-}
-public class ParkingStatus
-{
-    public double Rate { get; set; }
-    public int Current { get; set; }
-    public DateTime CurrentTime { get; set; }
-    public int CurrentCapacity { get; set; }
-    public ParkTrend Trend { get; set; }
-    public int RemainingMinutes { get; set; }
-    public string TrendString
-    {
-        get
-        {
-            return Trend.ToString();
-        }
-    }
-    public IEnumerable<ParkingPlace> ParkingPlaces { get; set; }
-
-}
-
-public class ParkingPlace
-{
-    public DateTime CheckDate { get; set; }
-    public int FreePlace { get; set; }
-    public int Capacity { get; set; }
-}
-
-
+//bGrid
 public class bGridTemperature
 {
     public int timestamp { get; set; }
@@ -88,6 +54,8 @@ public class bGridRectangle
 
 }
 
+
+//Weather
 
 public class WeatherInfo
 {
@@ -147,6 +115,30 @@ public class Weather
     public string main { get; set; }
     public string description { get; set; }
     public string icon { get; set; }
+}
+
+//Parking
+public class ParkingSpots
+{
+    public Parkingplace[] ParkingPlaces { get; set; }
+    public float Rate { get; set; }
+    public int Current { get; set; }
+    public DateTime CurrentTime { get; set; }
+    public int CurrentCapacity { get; set; }
+    public int Trend { get; set; }
+    public int RemainingMinutes { get; set; }
+    public string TrendString { get; set; }
+}
+
+public class Parkingplace
+{
+    public DateTime CheckDate { get; set; }
+    public int FreePlace { get; set; }
+    public int Capacity { get; set; }
+    public string PartitionKey { get; set; }
+    public string RowKey { get; set; }
+    public DateTime Timestamp { get; set; }
+    public string ETag { get; set; }
 }
 
 
