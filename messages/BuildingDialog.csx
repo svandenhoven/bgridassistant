@@ -95,6 +95,24 @@ public class BuildingDialog : LuisDialog<object>
         }
     }
 
+    [LuisIntent("Hospitality")]
+    public async Task HospitalityIntent(IDialogContext context, LuisResult result)
+    {
+        EntityRecommendation entity;
+        var hasProduct = result.TryFindEntity("Products", out entity);
+        if(hasProduct)
+        {
+            var product = entity.Entity;
+            var msg = $"I will order {product} for you. I will arrive in 15 minutes.";
+            await context.SayAsync(msg, msg);
+        }
+        else
+        {
+            var msg = $"Did not understand what you want to order. Can you please order again?";
+            await context.SayAsync(msg, msg);
+        }
+    }
+
     [LuisIntent("GetTemperature")]
     public async Task GetTemperature(IDialogContext context, LuisResult result)
     {
