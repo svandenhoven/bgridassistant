@@ -23,22 +23,15 @@ using System.Drawing;
 [Serializable]
 public class BuildingDialog : LuisDialog<object>
 {
-    //public BuildingDialog() : base(new LuisService(new LuisModelAttribute(
-    //    ConfigurationManager.AppSettings["LuisAppId"], 
-    //    ConfigurationManager.AppSettings["LuisAPIKey"], 
-    //    domain: ConfigurationManager.AppSettings["LuisAPIHostName"])))
-    //{
-    //}
-
     // todo: make smarter memory,  wih short & longterm memory
     protected Hashtable memory = new Hashtable();
     protected string _lightSwitchState = "";
     protected string _lightIntensity = "";
 
     public BuildingDialog() : base(new LuisService(new LuisModelAttribute(
-    "bd1b92d3-076a-46c7-a1bb-2e10d9962f40",
-    "8248c94c11e743c58e29411c0219734d",
-    domain: "westeurope.api.cognitive.microsoft.com")))
+        ConfigurationManager.AppSettings["LuisAppId"],
+        ConfigurationManager.AppSettings["LuisAPIKey"],
+        domain: ConfigurationManager.AppSettings["LuisAPIHostName"])))
     {
         memory.Add("lightState", "");
         memory.Add("lightIntensity", "");
@@ -473,6 +466,8 @@ public class BuildingDialog : LuisDialog<object>
 
     private async Task<string> GetOfficeOccupancy()
     {
+        var rooms = ConfigurationManager.AppSettings["Rooms"].Split(',');
+        int[] workplaces = rooms.Select(x => int.Parse(x.ToString())).ToArray(); // { 416, 417 };
         var msg = "";
         var desks = await ExecuteAction<List<bGridOccpancy>>($"/api/occupancy/office/");
 
@@ -486,7 +481,6 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                int[] workplaces = { 416, 417 };
                 var availableDesks = desks.Where(d => d.value == 0 && workplaces.Contains(d.location_id));
                 if (availableDesks.Count() > 0)
                 {
