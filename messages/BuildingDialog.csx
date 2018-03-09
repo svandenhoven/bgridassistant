@@ -273,11 +273,15 @@ public class BuildingDialog : LuisDialog<object>
 
     private HttpClient GetHttpClient()
     {
+        var endpoint = ConfigurationManager.AppSettings["bGridEndPoint"];
+        var user = ConfigurationManager.AppSettings["bGridUser"];
+        var pw = ConfigurationManager.AppSettings["bGridPassword"];
+
         var bGridClient = new HttpClient()
         {
-            BaseAddress = new Uri("https://wsn-demo.evalan.com:8443")
+            BaseAddress = new Uri(endpoint)
         };
-        var byteArray = Encoding.ASCII.GetBytes("demo_set_1:Hp3B9E71b44DbJ2G9kxE");
+        var byteArray = Encoding.ASCII.GetBytes($"{user}:{pw}");
         bGridClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
         return bGridClient;
     }
