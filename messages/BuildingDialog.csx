@@ -374,7 +374,7 @@ public class BuildingDialog : LuisDialog<object>
                 var temp = tempInfo.Last();
                 var msg =  $"The temperature in {deskId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
                 if (cloudLevel < 25)
-                    msg = msg + $" It will be sunny today, so desk {deskId} might get warm in afternoon because it is on the southside of the building.";
+                    msg = msg + $" It will be sunny today, so desk {deskId} might get warm in afternoon.";
                 else
                     msg = msg + $" It will not be very sunny today, so desk {deskId} will stay cool.";
                 return msg;
@@ -494,7 +494,7 @@ public class BuildingDialog : LuisDialog<object>
                     foreach (var desk in availableDesks)
                     {
                         msg += desk.location_id;
-                        msg += (i < availableDesks.Count()) ? " and " : " ";
+                        msg += (i == availableDesks.Count()-1) ? " and " : " ";
                         i++;
                     }
                     msg += (availableDesks.Count() > 1) ? "are " : "is";
