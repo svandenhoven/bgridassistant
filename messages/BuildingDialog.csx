@@ -496,6 +496,11 @@ public class BuildingDialog : LuisDialog<object>
                         msg += desk.location_id;
                         msg += (i == availableDesks.Count()-1) ? " and " : " ";
                         i++;
+                        if(i > 3)
+                        {
+                            msg += $" and {availableDesks.Count() - i} desks more ";
+                            break;
+                        }
                     }
                     msg += (availableDesks.Count() > 1) ? "are " : "is";
                     msg += " available.";
