@@ -53,7 +53,19 @@ public class BuildingDialog : LuisDialog<object>
         }
         else
         {
-            msg = await GetOfficeOccupancy();
+            EntityRecommendation entity;
+            var gotEntity = result.TryFindEntity("Action", out entity);
+            var action = "";
+            if (gotEntity)
+            {
+                action = entity.Entity;
+            }
+            else
+            {
+                action = "work";
+            }
+
+            msg = await GetOfficeOccupancy(action);
             await context.SayAsync(msg, msg);
         }
     }
@@ -96,7 +108,7 @@ public class BuildingDialog : LuisDialog<object>
         if(hasProduct)
         {
             var product = entity.Entity;
-            var msg = $"I will order {product} for you. The {product} will arrive in 15 minutes.";
+            var msg = $"I cannot order {product} for you yet. This could be implemented by sending message to hospitality to deliver {product} in your location.";
             await context.SayAsync(msg, msg);
         }
         else
@@ -247,7 +259,7 @@ public class BuildingDialog : LuisDialog<object>
     [LuisIntent("Greeting")]
     public async Task GreetingIntent(IDialogContext context, LuisResult result)
     {
-        var msg = "Hi. This is building bot. You can ask temperature, availability and switch lights.";
+        var msg = "Hi. This is building bot. You can ask temperature, occupancy and switch lights. For Example say 'Ask Building Where can I work?'";
         await context.SayAsync(msg, msg);
     }
 
@@ -359,6 +371,10 @@ public class BuildingDialog : LuisDialog<object>
 
         var cloudLevel = await GetWeather();
 
+        var spotNames = new B3Spots();
+        var deskNum = Convert.ToInt16(deskId);
+        var deskName = spotNames.Spots[deskNum];
+
         var bGridClient = GetHttpClient();
         var tempResponse = await bGridClient.GetAsync($"api/locations/{deskId}/temperature");
         if (tempResponse.IsSuccessStatusCode)
@@ -367,22 +383,23 @@ public class BuildingDialog : LuisDialog<object>
             var tempInfo = JsonConvert.DeserializeObject<List<bGridTemperature>>(json);
             if (tempInfo.Count == 0)
             {
-                return $"I do not have information on desk {deskId} for you.";
+
+                return $"I do not have information on {deskName} for you.";
             }
             else
             {
                 var temp = tempInfo.Last();
-                var msg =  $"The temperature in {deskId} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
-                if (cloudLevel < 25)
-                    msg = msg + $" It will be sunny today, so desk {deskId} might get warm in afternoon.";
+                var msg =  $"The temperature in {deskName} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
+                if (cloudLevel < 40)
+                    msg = msg + $" It will be sunny today, so might get warm in afternoon.";
                 else
-                    msg = msg + $" It will not be very sunny today, so desk {deskId} will stay cool.";
+                    msg = msg + $" It will not be very sunny today, so will stay cool.";
                 return msg;
             }
         }
         else
         {
-            return $"Could not retrieve temperature for {deskId}.";
+            return $"Could not retrieve temperature for {deskName}.";
         }
     }
 
@@ -444,18 +461,22 @@ public class BuildingDialog : LuisDialog<object>
         var occupancyResponse = await bGridClient.GetAsync($"/api/occupancy/office/{deskId}");
         if (occupancyResponse.IsSuccessStatusCode)
         {
+            var spotNames = new B3Spots();
+            var deskNum = Convert.ToInt16(deskId);
+            var deskName = spotNames.Spots[deskNum];
+
             var json = await occupancyResponse.Content.ReadAsStringAsync();
             var occupancyInfo = JsonConvert.DeserializeObject<bGridOccpancy>(json);
             if (occupancyInfo == null)
             {
-                var msg = $"I do not have information on desk {deskId} for you.";
+                var msg = $"I do not have information on {deskName} for you.";
                 await context.SayAsync(msg, msg); 
             }
             else
             {
-                var msg = (occupancyInfo.value == 0) ? $"Yes, desk {deskId} is available." : $"No, desk {deskId} is not available.";
+                var msg = (occupancyInfo.value == 0) ? $"Yes, {deskName} is available." : $"No, desk {deskName} is not available.";
                 //await context.SayAsync(msg, msg);
-                var promptText = msg + $" Do you want more information of desk {deskId}?";
+                var promptText = msg + $" Do you want more information of {deskName}?";
                 var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
                 var prompt = new PromptDialog.PromptString(promptOption);
                 context.Call<string>(prompt, this.ResumeGetTemperatureAfterMoreInfoConfirmation);
@@ -468,10 +489,10 @@ public class BuildingDialog : LuisDialog<object>
         }
     }
 
-    private async Task<string> GetOfficeOccupancy()
+    private async Task<string> GetOfficeOccupancy(string actionType)
     {
-        var rooms = ConfigurationManager.AppSettings["Rooms"].Split(',');
-        int[] workplaces = rooms.Select(x => int.Parse(x.ToString())).ToArray(); // { 416, 417 };
+        var rooms = ConfigurationManager.AppSettings[actionType.ToLower()].Split(',');
+        int[] workplaces = rooms.Select(x => int.Parse(x.ToString())).ToArray(); 
         var msg = "";
         var desks = await ExecuteAction<List<bGridOccpancy>>($"/api/occupancy/office/");
 
@@ -485,27 +506,36 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                var availableDesks = desks.Where(d => d.value == 0 && workplaces.Contains(d.location_id));
-                if (availableDesks.Count() > 0)
+                var spots = new B3Spots().Spots;
+                var availableNodes = desks.Where(d => d.value == 0 && workplaces.Contains(d.location_id));
+                var availableSpotNames = new List<string>();
+                foreach(var desk in availableNodes)
+                {
+                    if(!availableSpotNames.Contains(spots[desk.location_id]))
+                    {
+                        availableSpotNames.Add(spots[desk.location_id]);
+                    }
+                }
+
+                var uniqueSpotNames = availableSpotNames.Distinct();
+                if (uniqueSpotNames.Count() > 0)
                 {
                     int i = 1;
-                    msg += "Desk";
-                    msg += (availableDesks.Count() > 1) ? "s " : " ";
-                    foreach (var desk in availableDesks)
+                    msg += actionType == "work" ? "The Desk" : "The Room";
+                    msg += (uniqueSpotNames.Count() > 1) ? "s " : " ";
+                    foreach (var spot in uniqueSpotNames)
                     {
-                        msg += desk.location_id;
-                        msg += (i == availableDesks.Count()-1) ? " and " : " ";
+                        msg += spot;
+                        msg += (i == uniqueSpotNames.Count()-1) ? " and " : ", ";
                         i++;
-                        if(i > 3)
+                        if(i > 3 && uniqueSpotNames.Count() > 4)
                         {
-                            msg += $" and {availableDesks.Count() - i} desks more ";
+                            msg += $" and {uniqueSpotNames.Count() - i} more ";
                             break;
                         }
                     }
-                    msg += (availableDesks.Count() > 1) ? "are " : "is";
+                    msg += (uniqueSpotNames.Count() > 1) ? "are " : "is";
                     msg += " available.";
-
-                    //msg += await GetTemperature(availableDesks.Last().location_id.ToString());
                 }
                 else
                     msg = "No desks are available.";
