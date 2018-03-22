@@ -158,9 +158,14 @@ public class BuildingDialog : LuisDialog<object>
         var gotDevice = result.TryFindEntity("Device", out deskEntity);
         var gotLightState = result.TryFindEntity("LightStates", out lightStateEntity);
 
-        if (gotDevice && gotLightState)
+        var lightId = "1";
+        if(gotDevice)
         {
-            var lightId = deskEntity.Entity;
+            lightId = deskEntity.Entity;
+        }
+
+        if (gotLightState)
+        {
             var lightState = lightStateEntity.Entity;
             var msg = await SetLight(lightId, lightState);
             await context.SayAsync(msg, msg);
