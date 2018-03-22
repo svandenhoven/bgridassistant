@@ -665,14 +665,20 @@ public class BuildingDialog : LuisDialog<object>
         var deskId = await result;
         switch (deskId)
         {
+            case "experience room.":
             case "experience room":
                 {
                     deskId = "26";
                     break;
                 }
+            default:
+                {
+                    deskId = RemoveNonCharacters(deskId);
+                    break;
+                }
         }
 
-        deskId = RemoveNonCharacters(deskId);
+
 
         var msg = await GetTemperature(deskId);
         await context.SayAsync(msg, msg);
