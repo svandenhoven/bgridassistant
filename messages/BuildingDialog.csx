@@ -49,6 +49,15 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
+            switch (deskId)
+            {
+                case "experience room":
+                    {
+                        deskId = "26";
+                        break;
+                    }
+            }
+
             await GetDeskOccupancy(context, deskId);
         }
         else
@@ -210,39 +219,48 @@ public class BuildingDialog : LuisDialog<object>
         var gotDevice = result.TryFindEntity("Device", out deskEntity);
         var gotlightIntensity = result.TryFindEntity("LightIntensity", out lightIntensityEntity);
 
-        if (gotDevice && gotlightIntensity)
+        var lightId = "1";
+        if (gotDevice)
         {
-            var lightId = deskEntity.Entity;
-            var lightIntensity = lightIntensityEntity.Entity;
-            var msg = await SetlightIntensity(lightId, lightIntensity);
-            await context.SayAsync(msg, msg);
-
+            lightId = deskEntity.Entity;
         }
-        else
-        {
-            if (gotlightIntensity)
-            {
-                _lightIntensity = lightIntensityEntity.Entity;
-            }
-            else
-            {
-                _lightIntensity = "25";
-            }
-            var promptText = $"For which light do you want to switch intensity to {_lightIntensity} procent?";
-            var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
-            var prompt = new PromptDialog.PromptString(promptOption);
-            context.Call<string>(prompt, this.ResumeDimLightAfterOrderDeskClarification);
 
-            //var lights = new ArrayList<string> { "1002", "1003", "1004", "1005", "1006" };
-            //foreach (var light in lights)
-            //{
-            //    var msgTemp = await SetlightIntensity(islandId, _lightIntensity);
-            //}
+        var lightIntensity = "25";
+        var msg = await SetlightIntensity(lightId, lightIntensity);
+        await context.SayAsync(msg, msg);
 
-            //var msg = $"Dimmed all lights to {_lightIntensity} percent.";
-            //await context.SayAsync(msg, msg);
+        //if (gotlightIntensity)
+        //{
+        //    var lightIntensity = lightIntensityEntity.Entity;
+        //    var msg = await SetlightIntensity(lightId, lightIntensity);
+        //    await context.SayAsync(msg, msg);
 
-        }
+        //}
+        //else
+        //{
+        //    if (gotlightIntensity)
+        //    {
+        //        _lightIntensity = lightIntensityEntity.Entity;
+        //    }
+        //    else
+        //    {
+        //        _lightIntensity = "25";
+        //    }
+        //    var promptText = $"For which light do you want to switch intensity to {_lightIntensity} procent?";
+        //    var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+        //    var prompt = new PromptDialog.PromptString(promptOption);
+        //    context.Call<string>(prompt, this.ResumeDimLightAfterOrderDeskClarification);
+
+        //    //var lights = new ArrayList<string> { "1002", "1003", "1004", "1005", "1006" };
+        //    //foreach (var light in lights)
+        //    //{
+        //    //    var msgTemp = await SetlightIntensity(islandId, _lightIntensity);
+        //    //}
+
+        //    //var msg = $"Dimmed all lights to {_lightIntensity} percent.";
+        //    //await context.SayAsync(msg, msg);
+
+        //}
     }
 
     [LuisIntent("Parking")]
