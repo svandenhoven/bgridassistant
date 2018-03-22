@@ -663,6 +663,15 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeGetTemperatureAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
     {
         var deskId = await result;
+        switch (deskId)
+        {
+            case "experience room":
+                {
+                    deskId = "26";
+                    break;
+                }
+        }
+
         deskId = RemoveNonCharacters(deskId);
 
         var msg = await GetTemperature(deskId);
