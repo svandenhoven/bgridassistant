@@ -136,6 +136,14 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
+            switch (deskId)
+            {
+                case "experience room":
+                    {
+                        deskId = "26";
+                        break;
+                    }
+            }
             var msg = await GetTemperature(deskId);
             await context.SayAsync(msg, msg);
 
