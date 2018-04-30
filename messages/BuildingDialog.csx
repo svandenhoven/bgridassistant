@@ -175,7 +175,8 @@ public class BuildingDialog : LuisDialog<object>
         var gotDevice = result.TryFindEntity("Device", out deskEntity);
         var gotLightState = result.TryFindEntity("LightStates", out lightStateEntity);
 
-        var lightId = "1";
+        //ConfigurationManager.AppSettings["DefaultLight"];
+        var lightId = "31";
         if(gotDevice)
         {
             lightId = deskEntity.Entity;
@@ -528,7 +529,7 @@ public class BuildingDialog : LuisDialog<object>
         var desks = await ExecuteAction<List<bGridOccpancy>>($"/api/occupancy/office/");
 
         if (desks == null)
-            msg = "I could not retrieve available desks.";
+            msg = "I could not retrieve availability information.";
         else
         {
             if (desks.Count == 0)
@@ -537,39 +538,39 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                var spots = new B3Spots().Spots;
-                var availableNodes = desks.Where(d => d.value == 0 && workplaces.Contains(d.location_id));
-                var availableSpotNames = new List<string>();
-                foreach(var desk in availableNodes)
+                Hashtable spots = new B3Spots().Spots;
+                var availableNodes = desks.Where(d => d.value != 1 && workplaces.Contains(d.location_id));
+                var availableRoomNames = new List<string>();
+                foreach(var node in availableNodes)
                 {
-                    if(!availableSpotNames.Contains(spots[desk.location_id]))
+                    if(!availableRoomNames.Contains(spots[node.location_id]))
                     {
-                        availableSpotNames.Add(spots[desk.location_id]);
+                        availableRoomNames.Add(spots[node.location_id].ToString());
                     }
                 }
 
-                var uniqueSpotNames = availableSpotNames.Distinct();
-                if (uniqueSpotNames.Count() > 0)
+                var uniqueRoomNames = availableRoomNames.Distinct();
+                if (uniqueRoomNames.Count() > 0)
                 {
                     int i = 1;
-                    msg += actionType == "work" ? "The Desk" : "The Room";
-                    msg += (uniqueSpotNames.Count() > 1) ? "s " : " ";
-                    foreach (var spot in uniqueSpotNames)
+                    msg += actionType == "work" ? "The Room" : "The Room";
+                    msg += (uniqueRoomNames.Count() > 1) ? "s " : " ";
+                    foreach (var spot in uniqueRoomNames)
                     {
                         msg += spot;
-                        msg += (i == uniqueSpotNames.Count()-1) ? " and " : ", ";
+                        msg += (i == uniqueRoomNames.Count()-1) ? " and " : ", ";
                         i++;
-                        if(i > 3 && uniqueSpotNames.Count() > 4)
+                        if(i > 3 && uniqueRoomNames.Count() > 4)
                         {
-                            msg += $" and {uniqueSpotNames.Count() - i} more ";
+                            msg += $" and {uniqueRoomNames.Count() - i} more ";
                             break;
                         }
                     }
-                    msg += (uniqueSpotNames.Count() > 1) ? "are " : "is";
+                    msg += (uniqueRoomNames.Count() > 1) ? "are " : "is";
                     msg += " available.";
                 }
                 else
-                    msg = "No desks are available.";
+                    msg = "No places are available.";
             }
         }
         return msg;

@@ -759,24 +759,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\sandervd\\.nuget\\packages\\": {}
+    "C:\\Users\\svand\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\sandervd\\source\\repos\\building-src\\messages\\messages.csproj",
+      "projectUniqueName": "C:\\Users\\svand\\source\\repos\\bgrid\\messages\\messages.csproj",
       "projectName": "messages",
-      "projectPath": "C:\\Users\\sandervd\\source\\repos\\building-src\\messages\\messages.csproj",
-      "packagesPath": "C:\\Users\\sandervd\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\sandervd\\source\\repos\\building-src\\messages\\obj\\",
+      "projectPath": "C:\\Users\\svand\\source\\repos\\bgrid\\messages\\messages.csproj",
+      "packagesPath": "C:\\Users\\svand\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\svand\\source\\repos\\bgrid\\messages\\obj\\",
       "projectStyle": "PackageReference",
       "skipContentFileWrite": true,
       "configFilePaths": [
-        "C:\\Users\\sandervd\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\svand\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
-        ".NETFramework,Version=v4.6"
+        "net46"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -793,7 +793,7 @@
         "dependencies": {
           "Microsoft.Bot.Builder.Azure": {
             "target": "Package",
-            "version": "3.1"
+            "version": "[3.1.0, )"
           }
         }
       }

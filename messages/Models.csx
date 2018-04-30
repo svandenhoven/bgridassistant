@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 //bGrid
 public class bGridTemperature
@@ -143,10 +144,19 @@ public class Parkingplace
 
 public class B3Spots
 {
-    public string[] Spots
+    public Hashtable Spots
     {
         get
         {
+            //"135,136,138,143,145,146",
+            Hashtable spots = new Hashtable();
+            spots.Add(135, "Existence");
+            spots.Add(136, "Existence");
+            spots.Add(138, "Existence");
+            spots.Add(143, "Existence");
+            spots.Add(145, "Existence");
+            spots.Add(146, "Existence");
+            /*
             string[] spots = new string[37];
             spots[0] = "";
             spots[1] = "Experience room";
@@ -185,6 +195,7 @@ public class B3Spots
             spots[34] = "First floor desk 3";
             spots[35] = "First floor desk 4";
             spots[36] = "First floor desk 5";
+            */
 
             return spots;
         }
