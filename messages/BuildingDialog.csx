@@ -140,7 +140,7 @@ public class BuildingDialog : LuisDialog<object>
             {
                 case "experience room":
                     {
-                        deskId = "26";
+                        deskId = "135";
                         break;
                     }
             }
