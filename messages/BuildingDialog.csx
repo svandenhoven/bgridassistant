@@ -405,7 +405,7 @@ public class BuildingDialog : LuisDialog<object>
 
         var spotNames = new B3Spots();
         var deskNum = Convert.ToInt16(deskId);
-        var deskName = spotNames.Spots[deskNum];
+        var deskName = spotNames.Spots[deskNum].ToString();
 
         var bGridClient = GetHttpClient();
         var tempResponse = await bGridClient.GetAsync($"api/locations/{deskId}/temperature");
