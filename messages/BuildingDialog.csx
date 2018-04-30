@@ -404,8 +404,8 @@ public class BuildingDialog : LuisDialog<object>
         var cloudLevel = await GetWeather();
 
         var spotNames = new B3Spots();
-        var deskNum = Convert.ToInt16(deskId);
-        var deskName = spotNames.Spots[deskNum].ToString();
+        var deskNum = Convert.ToInt32(deskId);
+        var deskName = spotNames.Spots[deskNum];
 
         var bGridClient = GetHttpClient();
         var tempResponse = await bGridClient.GetAsync($"api/locations/{deskId}/temperature");
