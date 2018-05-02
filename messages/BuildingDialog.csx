@@ -136,14 +136,6 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
-            switch (deskId)
-            {
-                case "experience room":
-                    {
-                        deskId = "135";
-                        break;
-                    }
-            }
             var msg = await GetTemperature(deskId);
             await context.SayAsync(msg, msg);
 
@@ -664,22 +656,7 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeGetTemperatureAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
     {
         var deskId = await result;
-        switch (deskId)
-        {
-            case "experience room.":
-            case "experience room":
-                {
-                    deskId = "26";
-                    break;
-                }
-            default:
-                {
-                    deskId = RemoveNonCharacters(deskId);
-                    break;
-                }
-        }
-
-
+        deskId = RemoveNonCharacters(deskId);
 
         var msg = await GetTemperature(deskId);
         await context.SayAsync(msg, msg);

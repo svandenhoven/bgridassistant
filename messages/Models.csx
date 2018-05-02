@@ -150,53 +150,53 @@ public class B3Spots
         {
             //"135,136,138,143,145,146",
             Hashtable spots = new Hashtable();
+            /*
             spots.Add(135, "Existence");
             spots.Add(136, "Existence");
             spots.Add(138, "Existence");
             spots.Add(143, "Existence");
             spots.Add(145, "Existence");
             spots.Add(146, "Existence");
-            /*
-            string[] spots = new string[37];
-            spots[0] = "";
-            spots[1] = "Experience room";
-            spots[2] = "B3 Building lobby";
-            spots[3] = "B3 Building lobby";
-            spots[4] = "B3 Building lobby";
-            spots[5] = "B3 Building lobby";
-            spots[6] = "B3 Building lobby";
-            spots[7] = "B3 Building lobby";
-            spots[8] = "B3 Building lobby";
-            spots[9] = "B3 Building lobby";
-            spots[10] = "B3 Building lobby";
-            spots[11] = "B3 Building lobby";
-            spots[12] = "Seating area";
-            spots[13] = "Ground floor desk 1";
-            spots[14] = "Ground floor desk 2";
-            spots[15] = "Ground floor desk 3";
-            spots[16] = "Ground floor desk 4";
-            spots[17] = "Hospitality desk";
-            spots[18] = "Hospitality desk";
-            spots[19] = "Ground floor meeting room";
-            spots[20] = "Ground floor meeting room";
-            spots[21] = "Ground floor meeting room";
-            spots[22] = "Ground floor meeting room";
-            spots[23] = "Experience room";
-            spots[24] = "Ground floor meeting room";
-            spots[25] = "Ground floor meeting room";
-            spots[26] = "Experience Room";
-            spots[27] = "Experience Room";
-            spots[28] = "Microsoft 1st floor meeting room 1";
-            spots[29] = "Microsoft 1st floor meeting room 2";
-            spots[30] = "Microsoft 1st floor seating area";
-            spots[31] = "Experience room";
-            spots[32] = "First floor desk 1";
-            spots[33] = "First floor desk 2";
-            spots[34] = "First floor desk 3";
-            spots[35] = "First floor desk 4";
-            spots[36] = "First floor desk 5";
             */
 
+            //B3 Building
+            spots.Add(0,"");
+            spots.Add(1,"Experience room");
+            spots.Add(2,"B3 Building lobby");
+            spots.Add(3,"B3 Building lobby");
+            spots.Add(4,"B3 Building lobby");
+            spots.Add(5,"B3 Building lobby");
+            spots.Add(6,"B3 Building lobby");
+            spots.Add(7,"B3 Building lobby");
+            spots.Add(8,"B3 Building lobby");
+            spots.Add(9,"B3 Building lobby");
+            spots.Add(10,"B3 Building lobby");
+            spots.Add(11,"B3 Building lobby");
+            spots.Add(12,"Seating area");
+            spots.Add(13,"Ground floor desk 1");
+            spots.Add(14,"Ground floor desk 2");
+            spots.Add(15,"Ground floor desk 3");
+            spots.Add(16,"Ground floor desk 4");
+            spots.Add(17,"Hospitality desk");
+            spots.Add(18,"Hospitality desk");
+            spots.Add(19,"Ground floor meeting room");
+            spots.Add(20,"Ground floor meeting room");
+            spots.Add(21,"Ground floor meeting room");
+            spots.Add(22,"Ground floor meeting room");
+            spots.Add(23,"Experience room");
+            spots.Add(24,"Ground floor meeting room");
+            spots.Add(25,"Ground floor meeting room");
+            spots.Add(26,"Experience Room");
+            spots.Add(27,"Experience Room");
+            spots.Add(28,"Microsoft 1st floor meeting room 1");
+            spots.Add(29,"Microsoft 1st floor meeting room 2");
+            spots.Add(30,"Microsoft 1st floor seating area");
+            spots.Add(31,"Experience room");
+            spots.Add(32,"First floor desk 1");
+            spots.Add(33,"First floor desk 2");
+            spots.Add(34,"First floor desk 3");
+            spots.Add(35,"First floor desk 4");
+            spots.Add(36,"First floor desk 5");
             return spots;
         }
     }
