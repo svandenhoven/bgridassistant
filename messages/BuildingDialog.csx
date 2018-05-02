@@ -477,7 +477,7 @@ public class BuildingDialog : LuisDialog<object>
         if (occupancyResponse.IsSuccessStatusCode)
         {
             var spotNames = new B3Spots();
-            var deskNum = Convert.ToInt16(deskId);
+            var deskNum = Convert.ToInt32(deskId);
             var deskName = spotNames.Spots[deskNum];
 
             var json = await occupancyResponse.Content.ReadAsStringAsync();
