@@ -175,8 +175,8 @@ public class BuildingDialog : LuisDialog<object>
         var gotDevice = result.TryFindEntity("Device", out deskEntity);
         var gotLightState = result.TryFindEntity("LightStates", out lightStateEntity);
 
-        //ConfigurationManager.AppSettings["DefaultLight"];
-        var lightId = "31";
+        var lightId =  ConfigurationManager.AppSettings["bGridDefaultIsland"];
+        //var lightId = "31";
         if(gotDevice)
         {
             lightId = deskEntity.Entity;
