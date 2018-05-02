@@ -49,15 +49,6 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
-            switch (deskId)
-            {
-                case "experience room":
-                    {
-                        deskId = "26";
-                        break;
-                    }
-            }
-
             await GetDeskOccupancy(context, deskId);
         }
         else
