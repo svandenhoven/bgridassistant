@@ -49,6 +49,8 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
+            if (deskId.ToLower() == "experience room")
+                deskId = "31";
             await GetDeskOccupancy(context, deskId);
         }
         else
@@ -127,6 +129,8 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
+            if (deskId.ToLower() == "experience room")
+                deskId = "31";
             var msg = await GetTemperature(deskId);
             await context.SayAsync(msg, msg);
 
