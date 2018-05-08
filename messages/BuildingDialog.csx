@@ -50,7 +50,7 @@ public class BuildingDialog : LuisDialog<object>
         {
             var deskId = deskEntity.Entity;
             if (deskId.ToLower() == "experience room")
-                deskId = "31";
+                deskId = "26";
             if (deskId.ToLower().Contains("lobby"))
                 deskId = "2";
             await GetDeskOccupancy(context, deskId);
