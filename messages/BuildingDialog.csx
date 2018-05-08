@@ -497,7 +497,7 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                var msg = (occupancyInfo.value == 0) ? $"Yes, {deskName} is available." : $"No, desk {deskName} is not available.";
+                var msg = (occupancyInfo.value != 1) ? $"Yes, {deskName} is available." : $"No, {deskName} is not available.";
                 //await context.SayAsync(msg, msg);
                 var promptText = msg + $" Do you want more information of {deskName}?";
                 var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
