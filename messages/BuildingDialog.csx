@@ -51,6 +51,8 @@ public class BuildingDialog : LuisDialog<object>
             var deskId = deskEntity.Entity;
             if (deskId.ToLower() == "experience room")
                 deskId = "31";
+            if (deskId.ToLower().Contains("lobby"))
+                deskId = "2";
             await GetDeskOccupancy(context, deskId);
         }
         else
@@ -131,6 +133,8 @@ public class BuildingDialog : LuisDialog<object>
             var deskId = deskEntity.Entity;
             if (deskId.ToLower() == "experience room")
                 deskId = "31";
+            if (deskId.ToLower().Contains("lobby"))
+                deskId = "2";
             var msg = await GetTemperature(deskId);
             await context.SayAsync(msg, msg);
 
@@ -652,6 +656,10 @@ public class BuildingDialog : LuisDialog<object>
     {
         var deskId = await result;
         deskId = RemoveNonCharacters(deskId);
+        if (deskId.ToLower() == "experience room")
+            deskId = "31";
+        if (deskId.ToLower().Contains("lobby"))
+            deskId = "2";
 
         var msg = await GetTemperature(deskId);
         await context.SayAsync(msg, msg);
