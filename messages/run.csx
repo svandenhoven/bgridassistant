@@ -45,6 +45,11 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
         {
             //Authorize any allowed users
             var allowedUsers = ConfigurationManager.AppSettings["AuthorizedUsers"].Split(',');
+            var channeldata = activity.ChannelData;
+            var channeldatatxt = JsonConvert.SerializeObject(channeldata);
+
+            log.Info(channeldatatxt);
+
             if (!allowedUsers.Contains(activity.From.Id))
             {
                 var client = new ConnectorClient(new Uri(activity.ServiceUrl));
