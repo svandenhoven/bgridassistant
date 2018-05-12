@@ -49,7 +49,7 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
             {
                 var client = new ConnectorClient(new Uri(activity.ServiceUrl));
                 var reply = activity.CreateReply();
-                reply.Text = "You are not authorized to use this skill.";
+                reply.Text = $"You {activity.From.Id} are not authorized to use this skill.";
                 await client.Conversations.ReplyToActivityAsync(reply);
                 return req.CreateResponse(HttpStatusCode.Accepted);
             }
