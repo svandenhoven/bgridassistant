@@ -48,7 +48,16 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
             var channeldata = activity.ChannelData;
             var channeldatatxt = JsonConvert.SerializeObject(channeldata);
 
-            log.Info(channeldatatxt);
+            log.Info($"ChannelData: {channeldatatxt}.");
+
+            var userInfo = activity.Entities.FirstOrDefault(e => e.Type.Equals("UserInfo"));
+            if(userInfo != null)
+            {
+                var userInfoTxt = JsonConvert.SerializeObject(userInfo);
+
+                log.Info($"UserInfo: {userInfoTxt}.");
+            }
+
 
             if (!allowedUsers.Contains(activity.From.Id))
             {
