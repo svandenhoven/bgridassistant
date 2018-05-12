@@ -49,10 +49,7 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
-            if (deskId.ToLower() == "experience room")
-                deskId = "26";
-            if (deskId.ToLower().Contains("lobby"))
-                deskId = "2";
+            deskId = new B3Spots().SpotKey(deskId);
             await GetDeskOccupancy(context, deskId);
         }
         else
@@ -131,12 +128,10 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
-            if (deskId.ToLower() == "experience room")
-                deskId = "31";
-            if (deskId.ToLower().Contains("lobby"))
-                deskId = "2";
+            deskId = new B3Spots().SpotKey(deskId);
             var msg = await GetTemperature(deskId);
             await context.SayAsync(msg, msg);
+
 
         }
         else
@@ -167,7 +162,7 @@ public class BuildingDialog : LuisDialog<object>
         var gotLightState = result.TryFindEntity("LightStates", out lightStateEntity);
 
         var lightId =  ConfigurationManager.AppSettings["bGridDefaultIsland"];
-        //var lightId = "31";
+
         if(gotDevice)
         {
             lightId = deskEntity.Entity;
@@ -392,8 +387,6 @@ public class BuildingDialog : LuisDialog<object>
         else
             memory.Add("lastDevice", deskId);
 
-        var cloudLevel = await GetWeather();
-
         var spotNames = new B3Spots();
         var deskNum = Convert.ToInt32(deskId);
         var deskName = spotNames.Spots[deskNum];
@@ -413,10 +406,6 @@ public class BuildingDialog : LuisDialog<object>
             {
                 var temp = tempInfo.Last();
                 var msg =  $"The temperature in {deskName} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
-                if (cloudLevel < 40)
-                    msg = msg + $" It will be sunny today, so might get warm in afternoon.";
-                else
-                    msg = msg + $" It will not be very sunny today, so will stay cool.";
                 return msg;
             }
         }
@@ -644,6 +633,14 @@ public class BuildingDialog : LuisDialog<object>
 
             var msg = await GetTemperature(deskId);
             await context.SayAsync(msg, msg);
+
+            await context.SayAsync("Getting weather info for you.", "Getting weather info for you.");
+            var cloudLevel = await GetWeather();
+            if (cloudLevel < 40)
+                msg = $" It will be sunny today, so might get warm in afternoon.";
+            else
+                msg = $" It will not be very sunny today, so will stay cool.";
+            await context.SayAsync(msg, msg);
         }
         else
         {
@@ -656,12 +653,17 @@ public class BuildingDialog : LuisDialog<object>
     {
         var deskId = await result;
         deskId = RemoveNonCharacters(deskId);
-        if (deskId.ToLower() == "experience room")
-            deskId = "31";
-        if (deskId.ToLower().Contains("lobby"))
-            deskId = "2";
+        deskId = new B3Spots().SpotKey(deskId);
 
         var msg = await GetTemperature(deskId);
+        await context.SayAsync(msg, msg);
+
+        await context.SayAsync("Getting weather info for you.", "Getting weather info for you.");
+        var cloudLevel = await GetWeather();
+        if (cloudLevel < 40)
+            msg = $" It will be sunny today, so might get warm in afternoon.";
+        else
+            msg = $" It will not be very sunny today, so will stay cool.";
         await context.SayAsync(msg, msg);
     }
 

@@ -5,6 +5,7 @@ using System;
 using System.Net;
 using System.Threading;
 using Newtonsoft.Json;
+using System.Configuration;
 
 using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Dialogs;
@@ -38,9 +39,21 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
         {
             return BotAuthenticator.GenerateUnauthorizedResponse(req);
         }
-        
+
+       
         if (activity != null)
         {
+            //Authorize any allowed users
+            var allowedUsers = ConfigurationManager.AppSettings["AuthorizedUsers"].Split(',');
+            if (!allowedUsers.Contains(activity.From.Id))
+            {
+                var client = new ConnectorClient(new Uri(activity.ServiceUrl));
+                var reply = activity.CreateReply();
+                reply.Text = "You are not authorized to use this skill.";
+                await client.Conversations.ReplyToActivityAsync(reply);
+                return req.CreateResponse(HttpStatusCode.Accepted);
+            }
+
             // one of these will have an interface and process it
             switch (activity.GetActivityType())
             {
