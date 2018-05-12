@@ -58,6 +58,9 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
                 log.Info($"UserInfo: {userInfoTxt}.");
             }
 
+            var activityTxt = JsonConvert.SerializeObject(activity);
+            log.Info($"UserInfo: {activityTxt}.");
+
 
             if (!allowedUsers.Contains(activity.From.Id))
             {
