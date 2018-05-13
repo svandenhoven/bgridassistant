@@ -62,6 +62,7 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
                 log.Info($"UserInfo: {userInfoTxt}.");
 
                 email = userInfo.Properties.Value<string>("UserEmail");
+                log.Info($"Email User: {email}.");
                 if (!string.IsNullOrEmpty(email))
                 {
                     if (allowedUsers.Contains(email))
