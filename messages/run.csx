@@ -61,7 +61,7 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
                 var userInfoTxt = JsonConvert.SerializeObject(userInfo);
                 log.Info($"UserInfo: {userInfoTxt}.");
 
-                email = userInfo.Properties.Value<string>("UserEmail");
+                email = userInfo.Properties.Value<string>("email");
                 log.Info($"Email User: {email}.");
                 if (!string.IsNullOrEmpty(email))
                 {
