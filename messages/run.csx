@@ -45,30 +45,28 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
         {
             //Authorize any allowed users
             var allowedUsers = ConfigurationManager.AppSettings["AuthorizedUsers"].Split(',');
+
+            var activityTxt = JsonConvert.SerializeObject(activity);
+            log.Info($"Activity: {activityTxt}.");
+
             var channeldata = activity.ChannelData;
             var channeldatatxt = JsonConvert.SerializeObject(channeldata);
-
             log.Info($"ChannelData: {channeldatatxt}.");
 
             var userInfo = activity.Entities.FirstOrDefault(e => e.Type.Equals("UserInfo"));
             if(userInfo != null)
             {
                 var userInfoTxt = JsonConvert.SerializeObject(userInfo);
-
                 log.Info($"UserInfo: {userInfoTxt}.");
-            }
 
-            var activityTxt = JsonConvert.SerializeObject(activity);
-            log.Info($"UserInfo: {activityTxt}.");
-
-
-            if (!allowedUsers.Contains(activity.From.Id))
-            {
-                var client = new ConnectorClient(new Uri(activity.ServiceUrl));
-                var reply = activity.CreateReply();
-                reply.Text = $"You are not authorized to use this skill. Your user name is {activity.From.Name}.";
-                await client.Conversations.ReplyToActivityAsync(reply);
-                return req.CreateResponse(HttpStatusCode.Accepted);
+                if (!allowedUsers.Contains(userInfo.Email))
+                {
+                    var client = new ConnectorClient(new Uri(activity.ServiceUrl));
+                    var reply = activity.CreateReply();
+                    reply.Text = $"You are not authorized to use this skill. Your user name is {activity.From.Name}.";
+                    await client.Conversations.ReplyToActivityAsync(reply);
+                    return req.CreateResponse(HttpStatusCode.Accepted);
+                }
             }
 
             // one of these will have an interface and process it
