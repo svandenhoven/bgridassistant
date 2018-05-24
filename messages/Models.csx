@@ -142,76 +142,36 @@ public class Parkingplace
     public string ETag { get; set; }
 }
 
-public class B3Spots
+[Serializable]
+public class AssistantDevices
 {
-    public string SpotKey(string name)
-    {
-        foreach(var k in Spots.Keys)
-        {
-            if(Spots[k].ToString().ToLower() == name.ToLower())
-            {
-                return k.ToString();
-            }
-        }
-        return name;
-    }
-    public Hashtable Spots
-    {
-        get
-        {         
-            Hashtable spots = new Hashtable();
-            //Edge Olympic
-            /*
-            spots.Add(135, "Existence");
-            spots.Add(136, "Existence");
-            spots.Add(138, "Existence");
-            spots.Add(143, "Existence");
-            spots.Add(145, "Existence");
-            spots.Add(146, "Existence");
-            */
-
-            //B3 Building
-            spots.Add(0,"");
-            spots.Add(1,"experience room");
-            spots.Add(2,"b3 building lobby");
-            spots.Add(3,"b3 building lobby");
-            spots.Add(4,"b3 building lobby");
-            spots.Add(5,"b3 building lobby");
-            spots.Add(6,"b3 building lobby");
-            spots.Add(7,"b3 building lobby");
-            spots.Add(8,"b3 building lobby");
-            spots.Add(9,"b3 building lobby");
-            spots.Add(10,"b3 building lobby");
-            spots.Add(11,"b3 building lobby");
-            spots.Add(12,"seating area");
-            spots.Add(13,"ground floor desk 1");
-            spots.Add(14,"ground floor desk 2");
-            spots.Add(15,"ground floor desk 3");
-            spots.Add(16,"ground floor desk 4");
-            spots.Add(17,"hospitality desk");
-            spots.Add(18,"hospitality desk");
-            spots.Add(19,"ground floor meeting room");
-            spots.Add(20,"ground floor meeting room");
-            spots.Add(21,"ground floor meeting room");
-            spots.Add(22,"ground floor meeting room");
-            spots.Add(23,"experience room");
-            spots.Add(24,"ground floor meeting room");
-            spots.Add(25,"ground floor meeting room");
-            spots.Add(26,"experience Room");
-            spots.Add(27,"experience Room");
-            spots.Add(28,"microsoft 1st floor meeting room 1");
-            spots.Add(29,"microsoft 1st floor meeting room 2");
-            spots.Add(30,"microsoft 1st floor seating area");
-            spots.Add(31,"experience room");
-            spots.Add(32,"first floor desk 1");
-            spots.Add(33,"first floor desk 2");
-            spots.Add(34,"first floor desk 3");
-            spots.Add(35,"first floor desk 4");
-            spots.Add(36,"first floor desk 5");
-            return spots;
-        }
-    }
+    public string Id { get; set; }
+    public string RoomName { get; set; }
+    public string DeviceAccount { get; set; }
 }
+
+[Serializable]
+public class BGridNode
+{
+    public int bGridId;
+    public string Name;
+    public string Type;
+}
+
+[Serializable]
+public class Building
+{
+    public string bGridEndPoint { get; set; }
+    public string bGridUser { get; set; }
+    public string bGridPassword { get; set; }
+    public string bGridDefaultIsland { get; set; }
+    public List<string> AuthorizedUsers { get; set; }
+    public List<BGridNode> BGridNodes { get; set; }
+    public List<AssistantDevices> Assistants { get; set; }
+
+}
+
+
 
 
 

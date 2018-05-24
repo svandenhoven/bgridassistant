@@ -3,6 +3,7 @@
 #load "Models.csx"
 
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
@@ -27,6 +28,7 @@ public class BuildingDialog : LuisDialog<object>
     protected Hashtable memory = new Hashtable();
     protected string _lightSwitchState = "";
     protected string _lightIntensity = "";
+    protected Building _settings;
 
     public BuildingDialog() : base(new LuisService(new LuisModelAttribute(
         ConfigurationManager.AppSettings["LuisAppId"],
@@ -37,6 +39,12 @@ public class BuildingDialog : LuisDialog<object>
         memory.Add("lightIntensity", "");
         memory.Add("lastDevice", "");
         memory.Add("lastAsset", "");
+
+        //Read Settings from Azure Blob
+        var settingFileName = ConfigurationManager.AppSettings["SettingsFile"];
+        var webClient = new WebClient();
+        var settingJson = webClient.DownloadString(settingFileName);
+        _settings = JsonConvert.DeserializeObject<Building>(settingJson);
     }
 
     [LuisIntent("GetDeskInfo")]
@@ -47,9 +55,9 @@ public class BuildingDialog : LuisDialog<object>
         var msg = "";
 
         if (gotDesk)
-        {
+        { 
             var deskId = deskEntity.Entity;
-            deskId = new B3Spots().SpotKey(deskId);
+            deskId = _settings.BGridNodes.Where(n => n.Name == deskId).First().bGridId.ToString();
             await GetDeskOccupancy(context, deskId);
         }
         else
@@ -128,7 +136,7 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
-            deskId = new B3Spots().SpotKey(deskId);
+            deskId = deskId = _settings.BGridNodes.Where(n => n.Name == deskId).First().bGridId.ToString();
             var msg = await GetTemperature(deskId);
             await context.SayAsync(msg, msg);
 
@@ -161,7 +169,23 @@ public class BuildingDialog : LuisDialog<object>
         var gotDevice = result.TryFindEntity("Device", out deskEntity);
         var gotLightState = result.TryFindEntity("LightStates", out lightStateEntity);
 
-        var lightId =  ConfigurationManager.AppSettings["bGridDefaultIsland"];
+        var lightId = _settings.bGridDefaultIsland;
+
+        //if (GetUserEmail(context) != "")
+        //{
+        //    var assistant = _settings.Assistants.Where(a => a.DeviceAccount == GetUserEmail(context)).First();
+        //    if (assistant != null)
+        //    {
+        //        var node = _settings.BGridNodes.Where(n => n.Type == "island" && n.Name == assistant.RoomName).First();
+        //        if(node != null)
+        //        {
+        //            lightId = node.bGridId.ToString();
+        //        }
+        //    }
+        //}
+
+
+        var activity = context.Activity;
 
         if(gotDevice)
         {
@@ -184,17 +208,6 @@ public class BuildingDialog : LuisDialog<object>
                 var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
                 var prompt = new PromptDialog.PromptString(promptOption);
                 context.Call<string>(prompt, this.ResumeLightSwitchAfterOrderDeskClarification);
-
-
-                //var lights = new ArrayList<string> { "1002", "1003", "1004", "1005", "1006" };
-                //foreach(var light in lights)
-                //{
-                //    var msgTemp = await SetLight(islandId, _lightSwitchState);
-                //}
-
-                //var msg = $"Switched all lights {_lightSwitchState}.";
-                //await context.SayAsync(msg, msg);
-
             }
             else
             {
@@ -223,39 +236,6 @@ public class BuildingDialog : LuisDialog<object>
         var lightIntensity = "25";
         var msg = await SetlightIntensity(lightId, lightIntensity);
         await context.SayAsync(msg, msg);
-
-        //if (gotlightIntensity)
-        //{
-        //    var lightIntensity = lightIntensityEntity.Entity;
-        //    var msg = await SetlightIntensity(lightId, lightIntensity);
-        //    await context.SayAsync(msg, msg);
-
-        //}
-        //else
-        //{
-        //    if (gotlightIntensity)
-        //    {
-        //        _lightIntensity = lightIntensityEntity.Entity;
-        //    }
-        //    else
-        //    {
-        //        _lightIntensity = "25";
-        //    }
-        //    var promptText = $"For which light do you want to switch intensity to {_lightIntensity} procent?";
-        //    var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
-        //    var prompt = new PromptDialog.PromptString(promptOption);
-        //    context.Call<string>(prompt, this.ResumeDimLightAfterOrderDeskClarification);
-
-        //    //var lights = new ArrayList<string> { "1002", "1003", "1004", "1005", "1006" };
-        //    //foreach (var light in lights)
-        //    //{
-        //    //    var msgTemp = await SetlightIntensity(islandId, _lightIntensity);
-        //    //}
-
-        //    //var msg = $"Dimmed all lights to {_lightIntensity} percent.";
-        //    //await context.SayAsync(msg, msg);
-
-        //}
     }
 
     [LuisIntent("Parking")]
@@ -295,6 +275,19 @@ public class BuildingDialog : LuisDialog<object>
         await context.SayAsync(msg, msg);
     }
 
+
+    //private string GetUserEmail(IDialogContext context)
+    //{
+    //    var userInfo = context.Activity.Entities.FirstOrDefault(e => e.Type.Equals("UserInfo"));
+    //    var userEmail = "";
+    //    if (userInfo != null)
+    //    {
+    //        var userInfoTxt = JsonConvert.SerializeObject(userInfo);
+    //        userEmail = userInfo.Properties.Value<string>("email");
+    //    }
+    //    return userEmail;
+    //}
+
     private async Task ShowLuisResult(IDialogContext context, LuisResult result)
     {
         await context.PostAsync($"You have reached {result.Intents[0].Intent}. You said: {result.Query}");
@@ -303,9 +296,9 @@ public class BuildingDialog : LuisDialog<object>
 
     private HttpClient GetHttpClient()
     {
-        var endpoint = ConfigurationManager.AppSettings["bGridEndPoint"];
-        var user = ConfigurationManager.AppSettings["bGridUser"];
-        var pw = ConfigurationManager.AppSettings["bGridPassword"];
+        var endpoint = _settings.bGridEndPoint;
+        var user = _settings.bGridUser;
+        var pw = _settings.bGridPassword;
 
         var bGridClient = new HttpClient()
         {
@@ -387,9 +380,8 @@ public class BuildingDialog : LuisDialog<object>
         else
             memory.Add("lastDevice", deskId);
 
-        var spotNames = new B3Spots();
         var deskNum = Convert.ToInt32(deskId);
-        var deskName = spotNames.Spots[deskNum];
+        var deskName = deskId = _settings.BGridNodes.Where(n => n.bGridId == deskNum).First().Name;
 
         var bGridClient = GetHttpClient();
         var tempResponse = await bGridClient.GetAsync($"api/locations/{deskId}/temperature");
@@ -473,9 +465,8 @@ public class BuildingDialog : LuisDialog<object>
         var occupancyResponse = await bGridClient.GetAsync($"/api/occupancy/office/{deskId}");
         if (occupancyResponse.IsSuccessStatusCode)
         {
-            var spotNames = new B3Spots();
             var deskNum = Convert.ToInt32(deskId);
-            var deskName = spotNames.Spots[deskNum];
+            var deskName = _settings.BGridNodes.Where(n => n.bGridId == deskNum).First().Name;
 
             var json = await occupancyResponse.Content.ReadAsStringAsync();
             var occupancyInfo = JsonConvert.DeserializeObject<bGridOccpancy>(json);
@@ -503,8 +494,9 @@ public class BuildingDialog : LuisDialog<object>
 
     private async Task<string> GetOfficeOccupancy(string actionType)
     {
-        var rooms = ConfigurationManager.AppSettings[actionType.ToLower()].Split(',');
-        int[] workplaces = rooms.Select(x => int.Parse(x.ToString())).ToArray(); 
+        var nodetype = actionType == "work" ? "desk" : "room";
+
+        var workplaces = _settings.BGridNodes.Where(n => n.Type == nodetype).Select(n => n.bGridId).ToArray();
         var msg = "";
         var desks = await ExecuteAction<List<bGridOccpancy>>($"/api/occupancy/office/");
 
@@ -518,16 +510,16 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                Hashtable spots = new B3Spots().Spots;
-                var availableNodes = desks.Where(d => d.value != 1 && workplaces.Contains(d.location_id));
-                var availableRoomNames = new List<string>();
-                foreach(var node in availableNodes)
-                {
-                    if(!availableRoomNames.Contains(spots[node.location_id]))
-                    {
-                        availableRoomNames.Add(spots[node.location_id].ToString());
-                    }
-                }
+                var availableNodes = desks.Where(d => d.value != 1 && workplaces.Contains(d.location_id)).Select(n => n.location_id).ToList();
+                var availableRoomNames = _settings.BGridNodes.Where(n => availableNodes.Contains(n.bGridId)).Select(n => n.Name).ToList();
+                //var availableRoomNames = new List<string>();
+                //foreach(var node in availableNodes)
+                //{
+                //    if(!availableRoomNames.Contains(spots[node.location_id]))
+                //    {
+                //        availableRoomNames.Add(spots[node.location_id].ToString());
+                //    }
+                //}
 
                 var uniqueRoomNames = availableRoomNames.Distinct();
                 if (uniqueRoomNames.Count() > 0)
@@ -653,7 +645,7 @@ public class BuildingDialog : LuisDialog<object>
     {
         var deskId = await result;
         deskId = RemoveNonCharacters(deskId);
-        deskId = new B3Spots().SpotKey(deskId);
+        deskId = _settings.BGridNodes.Where(n => n.Name == deskId).First().bGridId.ToString();
 
         var msg = await GetTemperature(deskId);
         await context.SayAsync(msg, msg);

@@ -43,6 +43,12 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
        
         if (activity != null)
         {
+            //Read Settings from Azure Blob
+            var settingFileName = ConfigurationManager.AppSettings["SettingsFile"];
+            var webClient = new WebClient();
+            var settingJson = webClient.DownloadString(settingFileName);
+            var settings = JsonConvert.DeserializeObject<Building>(settingJson);
+
             var activityTxt = JsonConvert.SerializeObject(activity);
             log.Info($"Activity: {activityTxt}.");
 
@@ -53,7 +59,6 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
             var userInfo = activity.Entities.FirstOrDefault(e => e.Type.Equals("UserInfo"));
 
             //Authorize any allowed users
-            var allowedUsers = ConfigurationManager.AppSettings["AuthorizedUsers"].Split(',');
             var email = "unknown";
             var authorized = false;
             if (userInfo != null)
@@ -62,16 +67,23 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
                 log.Info($"UserInfo: {userInfoTxt}.");
 
                 email = userInfo.Properties.Value<string>("email");
-                log.Info($"Email User: {email}.");
+                log.Info($"Email User: {email}");
                 if (!string.IsNullOrEmpty(email))
                 {
-                    if (allowedUsers.Contains(email))
+                    if (settings.AuthorizedUsers.Contains(email))
                     {
                         authorized = true;
                     }
                 }
             }
-            if(!authorized)
+
+            //remove
+            if (settings.AuthorizedUsers.Contains("default-user"))
+            {
+                authorized = true;
+            }
+
+            if (!authorized)
             {
                 var client = new ConnectorClient(new Uri(activity.ServiceUrl));
                 var reply = activity.CreateReply();

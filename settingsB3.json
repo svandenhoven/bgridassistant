@@ -1,0 +1,200 @@
+{
+  "bGridEndPoint": "https://msb3pilot.evalan.com:8443",
+  "bGridUser": "svc_microsoft",
+  "bGridPassword": "4miAKQ2dWJ1viRjM1ohx",
+  "bGridDefaultIsland": "1",
+  "AuthorizedUsers": [
+    "svandenhoven@hotmail.com",
+    "ocp-invoke1@outlook.com",
+    "default-user"
+  ],
+  "Assistants": [
+    {
+      "Id": 1,
+      "RoomName": "experience room",
+      "DeviceAccount" : "ocp-invoke1@hotmail.com"
+    }
+  ],
+  "BGridNodes": [
+    {
+      "bGridId": 36,
+      "Name": "first floor desk 5",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 35,
+      "Name": "first floor desk 4",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 34,
+      "Name": "first floor desk 3",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 33,
+      "Name": "first floor desk 2",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 32,
+      "Name": "first floor desk 1",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 31,
+      "Name": "experience room",
+      "Type": "room"
+    },
+    {
+      "bGridId": 30,
+      "Name": "microsoft 1st floor seating area",
+      "Type": "room"
+    },
+    {
+      "bGridId": 29,
+      "Name": "microsoft 1st floor meeting room 2",
+      "Type": "room"
+    },
+    {
+      "bGridId": 28,
+      "Name": "microsoft 1st floor meeting room 1",
+      "Type": "room"
+    },
+    {
+      "bGridId": 27,
+      "Name": "experience room",
+      "Type": "room"
+    },
+    {
+      "bGridId": 26,
+      "Name": "experience room",
+      "Type": "room"
+    },
+    {
+      "bGridId": 25,
+      "Name": "ground floor meeting room",
+      "Type": "room"
+    },
+    {
+      "bGridId": 24,
+      "Name": "ground floor meeting room",
+      "Type": "room"
+    },
+    {
+      "bGridId": 23,
+      "Name": "experience room",
+      "Type": "room"
+    },
+    {
+      "bGridId": 22,
+      "Name": "ground floor meeting room",
+      "Type": "room"
+    },
+    {
+      "bGridId": 21,
+      "Name": "ground floor meeting room",
+      "Type": "room"
+    },
+    {
+      "bGridId": 20,
+      "Name": "ground floor meeting room",
+      "Type": "room"
+    },
+    {
+      "bGridId": 19,
+      "Name": "ground floor meeting room",
+      "Type": "room"
+    },
+    {
+      "bGridId": 18,
+      "Name": "hospitality desk",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 17,
+      "Name": "hospitality desk",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 16,
+      "Name": "ground floor desk 4",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 15,
+      "Name": "ground floor desk 3",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 14,
+      "Name": "ground floor desk 2",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 13,
+      "Name": "ground floor desk 1",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 12,
+      "Name": "seating area",
+      "Type": "room"
+    },
+    {
+      "bGridId": 11,
+      "Name": "b3 building lobby",
+      "Type": "room"
+    },
+    {
+      "bGridId": 10,
+      "Name": "b3 building lobby",
+      "Type": "room"
+    },
+    {
+      "bGridId": 9,
+      "Name": "b3 building lobby",
+      "Type": "room"
+    },
+    {
+      "bGridId": 8,
+      "Name": "b3 building lobby",
+      "Type": "room"
+    },
+    {
+      "bGridId": 7,
+      "Name": "b3 building lobby",
+      "Type": "room"
+    },
+    {
+      "bGridId": 6,
+      "Name": "b3 building lobby",
+      "Type": "room"
+    },
+    {
+      "bGridId": 5,
+      "Name": "b3 building lobby",
+      "Type": "room"
+    },
+    {
+      "bGridId": 4,
+      "Name": "b3 building lobby",
+      "Type": "room"
+    },
+    {
+      "bGridId": 3,
+      "Name": "b3 building lobby",
+      "Type": "room"
+    },
+    {
+      "bGridId": 2,
+      "Name": "b3 building lobby",
+      "Type": "room"
+    },
+    {
+      "bGridId": 1,
+      "Name": "experience room",
+      "Type": "island"
+    }
+  ]
+}
