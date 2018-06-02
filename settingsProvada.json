@@ -1,0 +1,61 @@
+{
+  "bGridEndPoint": "https://wsn-demo.evalan.com:8443",
+  "bGridUser": "demo_set_1",
+  "bGridPassword": "Hp3B9E71b44DbJ2G9kxE",
+  "bGridDefaultIsland": "1",
+  "AuthorizedUsers": [
+    "svandenhoven@hotmail.com",
+    "ocp-invoke1@outlook.com",
+    "Provada2018@outlook.com",
+    "default-user"
+  ],
+  "Assistants": [
+    {
+      "Id": 1,
+      "RoomName": "red room",
+      "DeviceAccount": "ocp-invoke1@hotmail.com"
+    }
+  ],
+  "BGridNodes": [
+    {
+      "bGridId": 12415,
+      "Name": "Meeting room 1",
+      "Type": "room"
+    },
+    {
+      "bGridId": 12420,
+      "Name": "Desk 2",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 12543,
+      "Name": "Meeting room 2",
+      "Type": "room"
+    },
+    {
+      "bGridId": 12559,
+      "Name": "Desk 4",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 12573,
+      "Name": "Desk 1",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 12578,
+      "Name": "Desk 5",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 12579,
+      "Name": "Desk 3",
+      "Type": "desk"
+    },
+    {
+      "bGridId": 1,
+      "Name": "experience room",
+      "Type": "island"
+    }
+  ]
+}

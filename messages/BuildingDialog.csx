@@ -376,12 +376,12 @@ public class BuildingDialog : LuisDialog<object>
     {
         //Write desk to memory for future use.
         if (memory.ContainsKey("lastDevice"))
-            memory["lastDevice"] = deskId;
+            memory.Remove("lastDevice");
         else
             memory.Add("lastDevice", deskId);
 
         var deskNum = Convert.ToInt32(deskId);
-        var deskName = deskId = _settings.BGridNodes.Where(n => n.bGridId == deskNum).First().Name;
+        var deskName = _settings.BGridNodes.Where(n => n.bGridId == deskNum).First().Name;
 
         var bGridClient = GetHttpClient();
         var tempResponse = await bGridClient.GetAsync($"api/locations/{deskId}/temperature");
@@ -525,7 +525,7 @@ public class BuildingDialog : LuisDialog<object>
                 if (uniqueRoomNames.Count() > 0)
                 {
                     int i = 1;
-                    msg += actionType == "work" ? "The Room" : "The Room";
+                    msg += actionType == "work" ? "The workplace" : "The room";
                     msg += (uniqueRoomNames.Count() > 1) ? "s " : " ";
                     foreach (var spot in uniqueRoomNames)
                     {
@@ -645,7 +645,7 @@ public class BuildingDialog : LuisDialog<object>
     {
         var deskId = await result;
         deskId = RemoveNonCharacters(deskId);
-        deskId = _settings.BGridNodes.Where(n => n.Name == deskId).First().bGridId.ToString();
+        deskId = _settings.BGridNodes.Where(n => n.Name.ToLower() == deskId.ToLower()).First().bGridId.ToString();
 
         var msg = await GetTemperature(deskId);
         await context.SayAsync(msg, msg);
@@ -686,8 +686,16 @@ public class BuildingDialog : LuisDialog<object>
 
     private string RemoveNonCharacters(string input)
     {
-        Regex rgx = new Regex("[^a-zA-Z0-9 -]");
-        return rgx.Replace(input, "");
+        //Regex rgx = new Regex("[^a-zA-Z0-9 -]");
+        //return rgx.Replace(input, "");
+        if(input[input.Length-1] == '.')
+        {
+            return input.Substring(0, input.Length - 2);
+        }
+        else
+        {
+            return input;
+        }
     }
 
 }
