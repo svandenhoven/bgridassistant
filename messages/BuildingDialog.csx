@@ -219,7 +219,7 @@ public class BuildingDialog : LuisDialog<object>
         var gotDevice = result.TryFindEntity("Device", out deskEntity);
         var gotlightIntensity = result.TryFindEntity("LightIntensity", out lightIntensityEntity);
 
-        var lightId = "1";
+        var lightId = _settings.bGridDefaultIsland; 
         if (gotDevice)
         {
             lightId = deskEntity.Entity;

@@ -2,7 +2,7 @@
   "bGridEndPoint": "https://microsoft-schiphol.evalan.com:8443",
   "bGridUser": "sandervdh",
   "bGridPassword": "Bt405XQyDm70dKR3ibIEvIcu",
-  "bGridDefaultIsland": "1",
+  "bGridDefaultIsland": "12429",
   "AuthorizedUsers": [
     "svandenhoven@hotmail.com",
     "ocp-invoke1@outlook.com",
@@ -10,7 +10,7 @@
   ],
   "Assistants": [
     {
-      "Id": 1,
+      "Id": 12429,
       "RoomName": "meeting room 4.5",
       "DeviceAccount": "Spaces2018@outlook.com"
     }
