@@ -57,7 +57,7 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         { 
             var deskId = deskEntity.Entity;
-            deskId = _settings.BGridNodes.Where(n => n.Name == deskId).First().bGridId.ToString();
+            deskId = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId)).First().bGridId.ToString();
             await GetDeskOccupancy(context, deskId);
         }
         else
@@ -136,7 +136,7 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
-            deskId = deskId = _settings.BGridNodes.Where(n => n.Name == deskId).First().bGridId.ToString();
+            deskId = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId)).First().bGridId.ToString();
             var msg = await GetTemperature(deskId);
             await context.SayAsync(msg, msg);
 
@@ -144,18 +144,10 @@ public class BuildingDialog : LuisDialog<object>
         }
         else
         {
-            if (memory["lastDevice"].ToString() != "")
-            {
-                var msg = await GetTemperature(memory["lastDevice"].ToString());
-                await context.SayAsync(msg, msg);
-            }
-            else
-            {
-                var promptText = "For which desk do you want to know temperature?";
-                var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
-                var prompt = new PromptDialog.PromptString(promptOption);
-                context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderDeskClarification);
-            }
+            var promptText = "For which desk do you want to know temperature?";
+            var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+            var prompt = new PromptDialog.PromptString(promptOption);
+            context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderDeskClarification);
         }
     }
 
@@ -644,8 +636,7 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeGetTemperatureAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
     {
         var deskId = await result;
-        deskId = RemoveNonCharacters(deskId);
-        deskId = _settings.BGridNodes.Where(n => n.Name.ToLower() == deskId.ToLower()).First().bGridId.ToString();
+        deskId = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId)).First().bGridId.ToString();
 
         var msg = await GetTemperature(deskId);
         await context.SayAsync(msg, msg);
@@ -662,7 +653,7 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeLightSwitchAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
     {
         var islandId = await result;
-        islandId = RemoveNonCharacters(islandId);
+        islandId = RemoveNonCharactersAndSpace(islandId);
         var msg = await SetLight(islandId, _lightSwitchState);
         await context.SayAsync(msg, msg);
     }
@@ -671,7 +662,7 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeDimLightAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
     {
         var islandId = await result;
-        islandId = RemoveNonCharacters(islandId);
+        islandId = RemoveNonCharactersAndSpace(islandId);
         var msg = await SetlightIntensity(islandId, _lightIntensity);
         await context.SayAsync(msg, msg);
     }
@@ -679,22 +670,22 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeFindAfterAssetClarification(IDialogContext context, IAwaitable<string> result)
     {
         var assetId = await result;
-        assetId = RemoveNonCharacters(assetId);
+        assetId = RemoveNonCharactersAndSpace(assetId);
         var msg = await FindAsset(assetId);
         await context.SayAsync(msg, msg);
     }
 
-    private string RemoveNonCharacters(string input)
+    private string RemoveNonCharactersAndSpace(string input)
     {
         //Regex rgx = new Regex("[^a-zA-Z0-9 -]");
         //return rgx.Replace(input, "");
         if(input[input.Length-1] == '.')
         {
-            return input.Substring(0, input.Length - 2);
+            return input.Substring(0, input.Length - 2).Replace(" ", "").ToLower();
         }
         else
         {
-            return input;
+            return input.Replace(" ","").ToLower();
         }
     }
 
