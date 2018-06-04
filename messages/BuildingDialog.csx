@@ -511,18 +511,18 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                var availableNodes = desks.Where(d => d.value != 1 && workplaces.Contains(d.location_id)).Select(n => n.location_id).ToList();
-                var availableRoomNames = _settings.BGridNodes.Where(n => availableNodes.Contains(n.bGridId)).Select(n => n.Name).ToList();
-                //var availableRoomNames = new List<string>();
-                //foreach(var node in availableNodes)
-                //{
-                //    if(!availableRoomNames.Contains(spots[node.location_id]))
-                //    {
-                //        availableRoomNames.Add(spots[node.location_id].ToString());
-                //    }
-                //}
+                var availableNodes = desks.Where(d => workplaces.Contains(d.location_id)).ToList();
+                var availableRoomNames = _settings.BGridNodes; //.Where(n => availableNodes.Contains(n.bGridId)).ToList();
+                var Nodes = from node in availableRoomNames
+                            join desk in desks on node.bGridId equals desk.location_id
+                            select new { Name = node.Name, Available = desk.value, Id = node.bGridId };
 
-                var uniqueRoomNames = availableRoomNames.Distinct();
+                var FreeRooms = from room in Nodes
+                                group room by room.Name into roomNodes
+                                where roomNodes.Where(n => n.Available == 2).Count() == 0
+                                select roomNodes.Key;
+
+                var uniqueRoomNames = FreeRooms.ToList().Distinct();
                 if (uniqueRoomNames.Count() > 0)
                 {
                     int i = 1;
@@ -622,8 +622,7 @@ public class BuildingDialog : LuisDialog<object>
     }
 
 
-
-    private async Task ResumeGetTemperatureAfterMoreInfoConfirmation(IDialogContext context, IAwaitable<string> result)
+        private async Task ResumeGetTemperatureAfterMoreInfoConfirmation(IDialogContext context, IAwaitable<string> result)
     {
         var confirm = await result;
         confirm = confirm.Replace(".", "");
