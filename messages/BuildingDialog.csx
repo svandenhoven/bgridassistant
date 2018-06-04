@@ -495,9 +495,7 @@ public class BuildingDialog : LuisDialog<object>
 
     private async Task<string> GetOfficeOccupancy(string actionType)
     {
-        var nodetype = actionType == "work" ? "desk" : "room";
-
-        var workplaces = _settings.BGridNodes.Where(n => n.Type == nodetype).Select(n => n.bGridId).ToArray();
+        var nodeType = actionType == "work" ? "desk" : "room";
         var msg = "";
         var desks = await ExecuteAction<List<bGridOccpancy>>($"/api/occupancy/office/");
 
@@ -511,10 +509,9 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
-                var availableNodes = desks.Where(d => workplaces.Contains(d.location_id)).ToList();
-                var availableRoomNames = _settings.BGridNodes; //.Where(n => availableNodes.Contains(n.bGridId)).ToList();
-                var Nodes = from node in availableRoomNames
+                var Nodes = from node in _settings.BGridNodes
                             join desk in desks on node.bGridId equals desk.location_id
+                            where node.Type == nodeType
                             select new { Name = node.Name, Available = desk.value, Id = node.bGridId };
 
                 var FreeRooms = from room in Nodes
@@ -522,7 +519,7 @@ public class BuildingDialog : LuisDialog<object>
                                 where roomNodes.Where(n => n.Available == 2).Count() == 0
                                 select roomNodes.Key;
 
-                var uniqueRoomNames = FreeRooms.ToList().Distinct();
+                var uniqueRoomNames = FreeRooms.Distinct();
                 if (uniqueRoomNames.Count() > 0)
                 {
                     int i = 1;
