@@ -136,15 +136,24 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
-            deskId = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId)).First().bGridId.ToString();
-            var msg = await GetTemperature(deskId);
-            await context.SayAsync(msg, msg);
-
-
+            var desk = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId));
+            if (desk.Count() > 0)
+            {
+                deskId = desk.First().bGridId.ToString();
+                var msg = await GetTemperature(deskId);
+                await context.SayAsync(msg, msg);
+            }
+            else
+            {
+                var promptText = "Did not understand the location, For which room do you want to know temperature?";
+                var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+                var prompt = new PromptDialog.PromptString(promptOption);
+                context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderDeskClarification);
+            }
         }
         else
         {
-            var promptText = "For which desk do you want to know temperature?";
+            var promptText = "For which room do you want to know temperature?";
             var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
             var prompt = new PromptDialog.PromptString(promptOption);
             context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderDeskClarification);
@@ -568,7 +577,12 @@ public class BuildingDialog : LuisDialog<object>
         var lightResponse = await bGridClient.PostAsync($"/api/islands/{islandId}/light/status", httpContent);
         if (lightResponse.IsSuccessStatusCode)
         {
-            return $"The light of {islandId} is {gotLightState}.";
+            var roomName = islandId;
+            var room = _settings.BGridNodes.Where(n => n.bGridId.ToString() == islandId);
+            if(roomName != null)
+                roomName = room.First().Name;
+
+            return $"Lights of {roomName} are {gotLightState}.";
 
         }
         else
@@ -594,8 +608,12 @@ public class BuildingDialog : LuisDialog<object>
         var lightResponse = await bGridClient.PostAsync($"/api/islands/{islandId}/light/intensity", httpContent);
         if (lightResponse.IsSuccessStatusCode)
         {
-            return $"Set lightIntensity of {islandId} to {lightIntensity} procent.";
+            var roomName = islandId;
+            var room = _settings.BGridNodes.Where(n => n.bGridId.ToString() == islandId);
+            if (roomName != null)
+                roomName = room.First().Name;
 
+            return $"Dimmed lights of {roomName} to {lightIntensity} procent.";
         }
         else
         {
