@@ -650,18 +650,28 @@ public class BuildingDialog : LuisDialog<object>
     private async Task ResumeGetTemperatureAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
     {
         var deskId = await result;
-        deskId = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId)).First().bGridId.ToString();
+        var desk = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId));
+        if (desk.Count() > 0)
+        {
+            deskId = desk.First().bGridId.ToString();
 
-        var msg = await GetTemperature(deskId);
-        await context.SayAsync(msg, msg);
+            var msg = await GetTemperature(deskId);
+            await context.SayAsync(msg, msg);
 
-        await context.SayAsync("Getting weather info for you.", "Getting weather info for you.");
-        var cloudLevel = await GetWeather();
-        if (cloudLevel < 40)
-            msg = $" It will be sunny today, so might get warm in afternoon.";
+            await context.SayAsync("Getting weather info for you.", "Getting weather info for you.");
+            var cloudLevel = await GetWeather();
+            if (cloudLevel < 40)
+                msg = $" It will be sunny today, so might get warm in afternoon.";
+            else
+                msg = $" It will not be very sunny today, so will stay cool.";
+            await context.SayAsync(msg, msg);
+        }
         else
-            msg = $" It will not be very sunny today, so will stay cool.";
-        await context.SayAsync(msg, msg);
+        {
+            var msg = $"I do not know {deskId}.";
+            await context.SayAsync(msg, msg);
+        }
+
     }
 
     private async Task ResumeLightSwitchAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
