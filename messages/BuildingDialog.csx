@@ -705,7 +705,7 @@ public class BuildingDialog : LuisDialog<object>
         //return rgx.Replace(input, "");
         if(input[input.Length-1] == '.')
         {
-            return input.Substring(0, input.Length - 2).Replace(" ", "").Replace(".","").ToLower();
+            return input.Replace(" ", "").Replace(".","").ToLower();
         }
         else
         {
