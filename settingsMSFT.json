@@ -3,6 +3,7 @@
   "bGridUser": "sandervdh",
   "bGridPassword": "Bt405XQyDm70dKR3ibIEvIcu",
   "bGridDefaultIsland": "23400",
+  "bGridDefaultRoom" :  "2301",
   "AuthorizedUsers": [
     "svandenhoven@hotmail.com",
     "ocp-invoke1@outlook.com",

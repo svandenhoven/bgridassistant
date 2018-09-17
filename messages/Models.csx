@@ -165,6 +165,7 @@ public class Building
     public string bGridUser { get; set; }
     public string bGridPassword { get; set; }
     public string bGridDefaultIsland { get; set; }
+    public string bGridDefaultRoom { get; set; }
     public List<string> AuthorizedUsers { get; set; }
     public List<BGridNode> BGridNodes { get; set; }
     public List<AssistantDevices> Assistants { get; set; }

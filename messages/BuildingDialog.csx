@@ -153,10 +153,18 @@ public class BuildingDialog : LuisDialog<object>
         }
         else
         {
-            var promptText = "For which room do you want to know temperature?";
-            var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
-            var prompt = new PromptDialog.PromptString(promptOption);
-            context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderDeskClarification);
+            //var promptText = "For which room do you want to know temperature?";
+            //var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+            //var prompt = new PromptDialog.PromptString(promptOption);
+            //context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderDeskClarification);
+            var deskId = _settings.bGridDefaultRoom;
+            var desk = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId));
+            if (desk.Count() > 0)
+            {
+                deskId = desk.First().bGridId.ToString();
+                var msg = await GetTemperature(deskId);
+                await context.SayAsync(msg, msg);
+            }
         }
     }
 
