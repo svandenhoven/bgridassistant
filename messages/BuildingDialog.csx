@@ -534,7 +534,7 @@ public class BuildingDialog : LuisDialog<object>
                     msg += (uniqueRoomNames.Count() > 1) ? "s " : " ";
                     foreach (var spot in uniqueRoomNames)
                     {
-                        msg += spot;
+                        msg += spot.Key;
                         msg += (i == uniqueRoomNames.Count()-1) ? " and " : ", ";
                         i++;
                         if(i > 3 && uniqueRoomNames.Count() > 4)
