@@ -1,0 +1,35 @@
+{
+  "bGridEndPoint": "https://microsoft-schiphol.evalan.com:8443",
+  "bGridUser": "sandervdh",
+  "bGridPassword": "Bt405XQyDm70dKR3ibIEvIcu",
+  "bGridDefaultIsland": "23400",
+  "AuthorizedUsers": [
+    "svandenhoven@hotmail.com",
+    "ocp-invoke1@outlook.com",
+    "default-user"
+  ],
+  "Assistants": [
+    {
+      "Id": 23400,
+      "RoomName": "meeting room 2301",
+      "DeviceAccount": "Spaces2018@outlook.com"
+    }
+  ],
+  "BGridNodes": [
+    {
+      "bGridId": 2254,
+      "Name": "2301",
+      "Type": "room"
+    },
+    {
+      "bGridId": 2246,
+      "Name": "2301",
+      "Type": "room"
+    },
+    {
+      "bGridId": 23400,
+      "Name": "2301",
+      "Type": "island"
+    }
+  ]
+}

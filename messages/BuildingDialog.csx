@@ -451,7 +451,6 @@ public class BuildingDialog : LuisDialog<object>
         {
             return "I am not able to get parking information.";
         }
-
     }
 
     private async Task GetDeskOccupancy(IDialogContext context, string deskId)
@@ -516,8 +515,8 @@ public class BuildingDialog : LuisDialog<object>
 
                 var FreeRooms = from room in Nodes
                                 group room by room.Name into roomNodes
-                                where roomNodes.Where(n => n.Available == 2).Count() == 0
-                                select roomNodes.Key;
+                                where Nodes.Where(n => n.Available == 2).Count() == 0
+                                select roomNodes;
 
                 var uniqueRoomNames = FreeRooms.Distinct();
                 if (uniqueRoomNames.Count() > 0)
