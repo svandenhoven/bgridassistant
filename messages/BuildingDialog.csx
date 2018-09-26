@@ -180,6 +180,7 @@ public class BuildingDialog : LuisDialog<object>
 
         var lightId = _settings.bGridDefaultIsland;
 
+        #region
         //if (GetUserEmail(context) != "")
         //{
         //    var assistant = _settings.Assistants.Where(a => a.DeviceAccount == GetUserEmail(context)).First();
@@ -192,21 +193,35 @@ public class BuildingDialog : LuisDialog<object>
         //        }
         //    }
         //}
-
+        #endregion
 
         var activity = context.Activity;
 
-        if(gotDevice)
+        if (gotDevice)
         {
             lightId = deskEntity.Entity;
-        }
+            var light = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(lightId));
+            if (light.Count() > 0)
+            {
+                lightId = light.First().bGridId.ToString();
+                if (gotLightState)
+                {
+                    var lightState = lightStateEntity.Entity;
+                    var msg = await SetLight(lightId, lightState);
+                    await context.SayAsync(msg, msg);
 
-        if (gotLightState)
-        {
-            var lightState = lightStateEntity.Entity;
-            var msg = await SetLight(lightId, lightState);
-            await context.SayAsync(msg, msg);
-
+                }
+                else
+                {
+                    var msg = "Please mention to switch light on or off";
+                    await context.SayAsync(msg, msg);
+                }
+            }
+            else
+            {
+                var msg = $"I do not know {lightId}. Please use correct name for lights.";
+                await context.SayAsync(msg, msg);
+            }
         }
         else
         {
@@ -223,7 +238,6 @@ public class BuildingDialog : LuisDialog<object>
                 var msg = "Please mention to switch light on or off";
                 await context.SayAsync(msg, msg);
             }
-
         }
     }
 
@@ -683,10 +697,20 @@ public class BuildingDialog : LuisDialog<object>
 
     private async Task ResumeLightSwitchAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
     {
-        var islandId = await result;
-        islandId = RemoveNonCharactersAndSpace(islandId);
-        var msg = await SetLight(islandId, _lightSwitchState);
-        await context.SayAsync(msg, msg);
+        var lightId = await result;
+        var light = RemoveNonCharactersAndSpace(lightId);
+        var nodes = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(light));
+        if (nodes.Count() > 0)
+        {
+            var islandId = nodes.First().bGridId.ToString();
+            var msg = await SetLight(islandId, _lightSwitchState);
+            await context.SayAsync(msg, msg);
+        }
+        else
+        {
+            var msg = $"I do not know {lightId}.";
+            await context.SayAsync(msg, msg);
+        }
     }
 
     //
