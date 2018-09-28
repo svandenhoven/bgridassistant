@@ -153,10 +153,10 @@ public class AssistantDevices
 [Serializable]
 public class BGridNode
 {
-    public int bGridId;
-    public string Name;
-    public string Type;
-    public string RoomName;
+    public int bGridId { get; set; }
+    public string Name { get; set; }
+    public string Type { get; set; }
+    public string RoomName { get; set; }
 }
 
 [Serializable]
