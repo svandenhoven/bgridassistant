@@ -20,17 +20,38 @@
     {
       "bGridId": 2254,
       "Name": "2301",
-      "Type": "room"
+      "Type": "room",
+      "RoomName" :  "room1"
     },
     {
       "bGridId": 2246,
       "Name": "2301",
-      "Type": "room"
+      "Type": "room",
+      "RoomName": "room1"
     },
     {
       "bGridId": 23400,
       "Name": "light 1",
-      "Type": "island"
+      "Type": "island",
+      "RoomName": "room1"
+    },
+    {
+      "bGridId": 23400,
+      "Name": "light 2",
+      "Type": "island",
+      "RoomName": "room1"
+    },
+    {
+      "bGridId": 23400,
+      "Name": "light 3",
+      "Type": "island",
+      "RoomName": "room1"
+    },
+    {
+      "bGridId": 23400,
+      "Name": "light 4",
+      "Type": "island",
+      "RoomName": "room1"
     }
   ]
 }

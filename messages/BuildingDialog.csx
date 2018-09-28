@@ -136,10 +136,10 @@ public class BuildingDialog : LuisDialog<object>
         if (gotDesk)
         {
             var deskId = deskEntity.Entity;
-            var desk = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId));
-            if (desk.Count() > 0)
+            var desks = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId));
+            if (desks.Count() > 0)
             {
-                deskId = desk.First().bGridId.ToString();
+                deskId = desks.First().bGridId.ToString();
                 var msg = await GetTemperature(deskId);
                 await context.SayAsync(msg, msg);
             }
@@ -197,46 +197,46 @@ public class BuildingDialog : LuisDialog<object>
 
         var activity = context.Activity;
 
-        if (gotDevice)
+        if (!gotLightState)
         {
-            lightId = deskEntity.Entity;
-            var light = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(lightId));
-            if (light.Count() > 0)
-            {
-                lightId = light.First().bGridId.ToString();
-                if (gotLightState)
-                {
-                    var lightState = lightStateEntity.Entity;
-                    var msg = await SetLight(lightId, lightState);
-                    await context.SayAsync(msg, msg);
-
-                }
-                else
-                {
-                    var msg = "Please mention to switch light on or off";
-                    await context.SayAsync(msg, msg);
-                }
-            }
-            else
-            {
-                var msg = $"I do not know {lightId}. Please use correct name for lights.";
-                await context.SayAsync(msg, msg);
-            }
+            var msg = "Please mention to switch light on or off";
+            await context.SayAsync(msg, msg);
         }
         else
         {
-            if (gotLightState)
+            var lightState = lightStateEntity.Entity;
+
+            if (gotDevice)
+            {
+                lightId = deskEntity.Entity;
+                if (RemoveNonCharactersAndSpace(lightId) == RemoveNonCharactersAndSpace("all lights"))
+                {
+                    var msg = await SetAllLights("room1", lightState);
+                    await context.SayAsync(msg, msg);
+                }
+                else
+                {
+                    var light = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(lightId));
+                    if (light.Count() > 0)
+                    {
+                        lightId = light.First().bGridId.ToString();
+                        var msg = await SetLight(lightId, lightState);
+                        await context.SayAsync(msg, msg);
+                    }
+                    else
+                    {
+                        var msg = $"I do not know {lightId}. Please use correct name for lights.";
+                        await context.SayAsync(msg, msg);
+                    }
+                }
+            }
+            else
             {
                 _lightSwitchState = lightStateEntity.Entity;
                 var promptText = $"Which light do you want to switch {_lightSwitchState}?";
                 var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
                 var prompt = new PromptDialog.PromptString(promptOption);
                 context.Call<string>(prompt, this.ResumeLightSwitchAfterOrderDeskClarification);
-            }
-            else
-            {
-                var msg = "Please mention to switch light on or off";
-                await context.SayAsync(msg, msg);
             }
         }
     }
@@ -275,8 +275,6 @@ public class BuildingDialog : LuisDialog<object>
         await context.SayAsync(msg, msg);
     }
 
-    // Go to https://luis.ai and create a new intent, then train/publish your luis app.
-    // Finally replace "Greeting" with the name of your newly created intent in the following handler
     [LuisIntent("Greeting")]
     public async Task GreetingIntent(IDialogContext context, LuisResult result)
     {
@@ -585,10 +583,20 @@ public class BuildingDialog : LuisDialog<object>
         }
     }
 
-    private async Task<string> SetLight(string islandId, string gotLightState)
+    private async Task<string> SetAllLights(string roomName, string lightState)
+    {
+        var isLands = _settings.BGridNodes.Where(n => n.RoomName == roomName && n.Type== "island");
+        foreach(var island in isLands)
+        {
+            await SetLight(island.bGridId.ToString(),lightState);
+        }
+        return $"Switch all lights {lightState}.";
+    }
+
+    private async Task<string> SetLight(string islandId, string lightState)
     {
         var bGridClient = GetHttpClient();
-        var json = "{ \"status\" : \"" + gotLightState + "\", \"return_address\":\"localhost\" }";
+        var json = "{ \"status\" : \"" + lightState + "\", \"return_address\":\"localhost\" }";
 
         var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -600,7 +608,7 @@ public class BuildingDialog : LuisDialog<object>
             if(roomName != null)
                 roomName = room.First().Name;
 
-            return $"Lights of {roomName} are {gotLightState}.";
+            return $"Lights of {roomName} are {lightState}.";
 
         }
         else

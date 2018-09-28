@@ -156,6 +156,7 @@ public class BGridNode
     public int bGridId;
     public string Name;
     public string Type;
+    public string RoomName;
 }
 
 [Serializable]
