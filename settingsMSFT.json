@@ -19,39 +19,39 @@
   "BGridNodes": [
     {
       "bGridId": 2254,
-      "Name": "2301",
+      "Name": "2254",
       "Type": "room",
-      "RoomName" :  "room1"
+      "RoomName": "2301"
     },
     {
       "bGridId": 2246,
-      "Name": "2301",
+      "Name": "2246",
       "Type": "room",
-      "RoomName": "room1"
+      "RoomName": "2301"
     },
     {
       "bGridId": 23400,
       "Name": "light 1",
       "Type": "island",
-      "RoomName": "room1"
+      "RoomName": "2301"
     },
     {
       "bGridId": 23400,
       "Name": "light 2",
       "Type": "island",
-      "RoomName": "room1"
+      "RoomName": "2301"
     },
     {
       "bGridId": 23400,
       "Name": "light 3",
       "Type": "island",
-      "RoomName": "room1"
+      "RoomName": "2301"
     },
     {
       "bGridId": 23400,
       "Name": "light 4",
       "Type": "island",
-      "RoomName": "room1"
+      "RoomName": "2301"
     }
   ]
 }

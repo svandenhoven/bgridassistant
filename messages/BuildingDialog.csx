@@ -158,7 +158,7 @@ public class BuildingDialog : LuisDialog<object>
             //var prompt = new PromptDialog.PromptString(promptOption);
             //context.Call<string>(prompt, this.ResumeGetTemperatureAfterOrderDeskClarification);
             var deskId = _settings.bGridDefaultRoom;
-            var desk = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(deskId));
+            var desk = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.RoomName) == RemoveNonCharactersAndSpace(deskId));
             if (desk.Count() > 0)
             {
                 deskId = desk.First().bGridId.ToString();
@@ -495,7 +495,10 @@ public class BuildingDialog : LuisDialog<object>
     {
         var nodeType = actionType == "work" ? "desk" : "room";
         var msg = "";
-        var desks = await ExecuteAction<List<bGridOccpancy>>($"/api/occupancy/office/");
+        var locations = await ExecuteAction<List<bGridLocations>>("/api/locations");
+        var desks = await ExecuteAction<List<bGridOccpancy>>("/api/occupancy/office/");
+
+
 
         if (desks == null)
             msg = "I could not retrieve availability information.";
@@ -507,14 +510,19 @@ public class BuildingDialog : LuisDialog<object>
             }
             else
             {
+                var LocationOccupancies = from loc in locations
+                                          join desk in desks on loc.id equals desk.location_id
+                                          where loc.building == "Microsoft"
+                                          select new { Id = loc.id, Occupancy = desk.value, Floor = loc.floor, Island = loc.island_id, X = loc.x, Y = loc.y, Z = loc.z };
+
                 var Nodes = from node in _settings.BGridNodes
-                            join desk in desks on node.bGridId equals desk.location_id
+                            join loc in LocationOccupancies on node.bGridId equals loc.Id
                             where node.Type == nodeType
-                            select new { Name = node.Name, Available = desk.value, Id = node.bGridId };
+                            select new { RoomName = node.RoomName, Name = node.Name, Occupancy = loc.Occupancy, Id = node.bGridId, Floor = loc.Floor, Island = loc.Island, X = loc.X, Y = loc.Y, Z = loc.Z };
 
                 var FreeRooms = from room in Nodes
-                                group room by room.Name into roomNodes
-                                where Nodes.Where(n => n.Available == 2).Count() == 0
+                                group room by room.RoomName into roomNodes
+                                where Nodes.Where(n => n.Occupancy == 2).Count() == 0
                                 select roomNodes;
 
                 var uniqueRoomNames = FreeRooms.Distinct();
@@ -526,7 +534,7 @@ public class BuildingDialog : LuisDialog<object>
                     foreach (var spot in uniqueRoomNames)
                     {
                         msg += spot.Key;
-                        msg += (i == uniqueRoomNames.Count()-1) ? " and " : ", ";
+                        msg += (i == uniqueRoomNames.Count()-1) ? " and " : ((i==1) ? " ": ", ");
                         i++;
                         if(i > 3 && uniqueRoomNames.Count() > 4)
                         {

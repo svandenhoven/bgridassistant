@@ -35,6 +35,21 @@ public class bGridAsset
     public string building { get; set; }
 }
 
+
+public class bGridLocations
+{
+    public int id { get; set; }
+    public string name { get; set; }
+    public int type { get; set; }
+    public int floor { get; set; }
+    public string building { get; set; }
+    public float x { get; set; }
+    public float y { get; set; }
+    public float z { get; set; }
+    public int? island_id { get; set; }
+}
+
+
 public class bGridRectangles
 {
     public string Name { get; set; }

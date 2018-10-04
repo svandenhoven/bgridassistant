@@ -1,6 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\messages"
   ],
+  "SelectedNode": "\\messages\\BuildingDialog.csx",
   "PreviewInSolutionExplorer": false
 }
