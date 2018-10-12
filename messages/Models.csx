@@ -175,6 +175,14 @@ public class BGridNode
 }
 
 [Serializable]
+public class BGridAsset
+{
+    public int AssetId { get; set; }
+    public string Type { get; set; }
+    public string Name { get; set; }
+}
+
+[Serializable]
 public class Building
 {
     public string bGridEndPoint { get; set; }
@@ -185,6 +193,7 @@ public class Building
     public List<string> AuthorizedUsers { get; set; }
     public List<BGridNode> BGridNodes { get; set; }
     public List<AssistantDevices> Assistants { get; set; }
+    public List<BGridAsset> BGridAssets { get; set; }
 
 }
 

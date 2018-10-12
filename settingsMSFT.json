@@ -3,7 +3,7 @@
   "bGridUser": "sandervdh",
   "bGridPassword": "Bt405XQyDm70dKR3ibIEvIcu",
   "bGridDefaultIsland": "23400",
-  "bGridDefaultRoom" :  "2301",
+  "bGridDefaultRoom": "2301",
   "AuthorizedUsers": [
     "svandenhoven@hotmail.com",
     "ocp-invoke1@outlook.com",
@@ -52,6 +52,18 @@
       "Name": "light 4",
       "Type": "island",
       "RoomName": "2301"
+    }
+  ],
+  "BGridAssets": [
+    {
+      "Name": "lisa",
+      "Type": "asset",
+      "AssetId": "12345"
+    },
+    {
+      "Name": "john",
+      "Type": "asset",
+      "AssetId": "67890"
     }
   ]
 }

@@ -87,9 +87,20 @@ public class BuildingDialog : LuisDialog<object>
 
         if (gotEntity)
         {
-            var entityValue = entity.Entity;
-            var msg = await FindAsset(entityValue);
-            await context.SayAsync(msg, msg);
+            var assetName = entity.Entity;
+            var assets = _settings.BGridAssets.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(assetName));
+            if (assets.Count() > 0)
+            {
+                var assetId = assets.First().AssetId.ToString();
+                var msg = await FindAsset(assetId);
+                await context.SayAsync(msg, msg);
+            }
+            else
+            {
+                var msg = $"Do not know {assetName}.";
+                await context.SayAsync(msg, msg);
+            }
+
 
         }
         else
@@ -206,9 +217,7 @@ public class BuildingDialog : LuisDialog<object>
             if (gotDevice)
             {
                 var roomname = lightEntity.Entity;
-                var nodes = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.RoomName) == RemoveNonCharactersAndSpace(roomname) && n.Type == "island");
-                lightId = nodes.First().bGridId.ToString();
-                var msg = await SwithLights(lightId, lightState);
+                var msg = await SwithLights(roomname, lightState);
                 await context.SayAsync(msg, msg);
             }
             else
@@ -225,20 +234,20 @@ public class BuildingDialog : LuisDialog<object>
     [LuisIntent("DimLight")]
     public async Task DimLight(IDialogContext context, LuisResult result)
     {
-        EntityRecommendation deskEntity;
+        EntityRecommendation nodeEntity;
         EntityRecommendation lightIntensityEntity;
 
-        var gotDevice = result.TryFindEntity("Device", out deskEntity);
+        var gotDevice = result.TryFindEntity("Device", out nodeEntity);
         var gotlightIntensity = result.TryFindEntity("LightIntensity", out lightIntensityEntity);
 
-        var lightId = _settings.bGridDefaultIsland; 
+        var roomname = _settings.bGridDefaultRoom; 
         if (gotDevice)
         {
-            lightId = deskEntity.Entity;
+            roomname = nodeEntity.Entity;
         }
 
         var lightIntensity = "25";
-        var msg = await SetlightIntensity(lightId, lightIntensity);
+        var msg = await SetlightIntensity(roomname, lightIntensity);
         await context.SayAsync(msg, msg);
     }
 
@@ -618,8 +627,8 @@ public class BuildingDialog : LuisDialog<object>
             var lights = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.RoomName) == RemoveNonCharactersAndSpace(roomname) && n.Type == "island");
             if (lights.Count() > 0)
             {
-                roomname = lights.First().bGridId.ToString();
-                var msg = await SetLight(roomname, lightState);
+                var lightId = lights.First().bGridId.ToString();
+                var msg = await SetLight(lightId, lightState);
                 return msg;
             }
             else
@@ -630,8 +639,15 @@ public class BuildingDialog : LuisDialog<object>
         }
     }
 
-    private async Task<string> SetlightIntensity(string islandId, string lightIntensity)
+    private async Task<string> SetlightIntensity(string roomName, string lightIntensity)
     {
+        var islandId = _settings.bGridDefaultIsland;
+        var lights = _settings.BGridNodes.Where(n => RemoveNonCharactersAndSpace(n.RoomName) == RemoveNonCharactersAndSpace(roomName) && n.Type == "island");
+        if (lights.Count() > 0)
+        {
+            islandId = lights.First().bGridId.ToString();
+        }
+
         var bGridClient = GetHttpClient();
         var obj = new
         {
@@ -646,16 +662,11 @@ public class BuildingDialog : LuisDialog<object>
         var lightResponse = await bGridClient.PostAsync($"/api/islands/{islandId}/light/intensity", httpContent);
         if (lightResponse.IsSuccessStatusCode)
         {
-            var roomName = islandId;
-            var room = _settings.BGridNodes.Where(n => n.bGridId.ToString() == islandId);
-            if (roomName != null)
-                roomName = room.First().Name;
-
             return $"Dimmed lights of {roomName} to {lightIntensity} procent.";
         }
         else
         {
-            return $"Could not set lightIntensity for {islandId}";
+            return $"Could not set lightIntensity for {roomName}";
         }
     }
     
