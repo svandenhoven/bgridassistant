@@ -1,11 +1,10 @@
 #r "Newtonsoft.Json"
 #r "System.Drawing"
 #load "Models.csx"
+#load "AssetHelper.csx"
 
 using System;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -88,35 +87,16 @@ public class BuildingDialog : LuisDialog<object>
         if (gotEntity)
         {
             var assetName = entity.Entity;
-            var assets = _settings.BGridAssets.Where(n => RemoveNonCharactersAndSpace(n.Name) == RemoveNonCharactersAndSpace(assetName));
-            if (assets.Count() > 0)
-            {
-                var assetId = assets.First().AssetId.ToString();
-                var msg = await FindAsset(assetId);
-                await context.SayAsync(msg, msg);
-            }
-            else
-            {
-                var msg = $"Do not know {assetName}.";
-                await context.SayAsync(msg, msg);
-            }
-
-
+            var assetHelper = new AssetHelper(_settings);
+            var msg = await assetHelper.GetAssetLocation(assetName);
+            await context.SayAsync(msg, msg);
         }
         else
         {
-            if (memory["lastAsset"].ToString() != "")
-            {
-                var msg = await FindAsset(memory["lastAsset"].ToString());
-                await context.SayAsync(msg, msg);
-            }
-            else
-            {
-                var promptText = "Did not heard a know asset, which asset do you want to find?";
-                var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
-                var prompt = new PromptDialog.PromptString(promptOption);
-                context.Call<string>(prompt, this.ResumeFindAfterAssetClarification);
-            }
+            var promptText = "Did not heard a know asset, which asset do you want to find?";
+            var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+            var prompt = new PromptDialog.PromptString(promptOption);
+            context.Call<string>(prompt, this.ResumeFindAfterAssetClarification);
         }
     }
 
@@ -305,83 +285,6 @@ public class BuildingDialog : LuisDialog<object>
         context.Wait(MessageReceived);
     }
 
-    private HttpClient GetHttpClient()
-    {
-        var endpoint = _settings.bGridEndPoint;
-        var user = _settings.bGridUser;
-        var pw = _settings.bGridPassword;
-
-        var bGridClient = new HttpClient()
-        {
-            BaseAddress = new Uri(endpoint)
-        };
-        var byteArray = Encoding.ASCII.GetBytes($"{user}:{pw}");
-        bGridClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-        return bGridClient;
-    }
-
-    private List<bGridRectangles> CreateSpots()
-    {
-        var scale = 1; //Todo: Add to config
-        var spots = new List<bGridRectangles>();
-        for(var x = -1; x<=11; x++)
-        {
-            for(var y=-1; y<=26; y++)
-            {
-                spots.Add(new bGridRectangles {
-                    Name = x.ToString() + ", " + y.ToString(),
-                    Spot = new bGridRectangle(x* scale, y* scale, (x+1)* scale, (y+1)* scale)
-                });
-            }
-        }    
-
-        return spots;
-    }
-
-    private string FindSpot(double x, double y)
-    {
-        var spotName = "";
-        var spots = CreateSpots();
-        foreach(var s in spots)
-        {
-            if (x >= s.Spot.X1 && x < s.Spot.X2 && y >= s.Spot.Y1 && y < s.Spot.Y2)
-            {
-                spotName = s.Name;
-                break;
-            }
-        }
-
-        return spotName;
-    }
-
-    private async Task<string> FindAsset(string assetId)
-    {
-        //Write desk to memory for future use.
-        if (memory.ContainsKey("lastAsset"))
-            memory["lastAsset"] = assetId;
-        else
-            memory.Add("lastAsset", assetId);
-
-        var msg = "";
-        var asset = await ExecuteAction<bGridAsset>($"/api/assets/{assetId}");
-        if(asset != null)
-        {
-            var x = Convert.ToInt32(asset.x) + 91.5;
-            var y = 36.5 - Convert.ToInt32(asset.y);
-            
-            var spot = FindSpot(x,y);
-
-            if (spot != "")
-                msg = $"Asset {assetId} can be found at square {spot}.";
-            else
-                msg = $"Asset {assetId} can be found at coordinate {x.ToString()}, {y.ToString()}.";
-        }
-        else
-        {
-            msg = $"Cannot find location of asset {assetId}";
-        }
-        return msg;
-    }
 
     private async Task<string> GetTemperature(string deskId)
     {
@@ -394,27 +297,17 @@ public class BuildingDialog : LuisDialog<object>
         var deskNum = Convert.ToInt32(deskId);
         var deskName = _settings.BGridNodes.Where(n => n.bGridId == deskNum).First().Name;
 
-        var bGridClient = GetHttpClient();
-        var tempResponse = await bGridClient.GetAsync($"api/locations/{deskId}/temperature");
-        if (tempResponse.IsSuccessStatusCode)
+        var tempInfo = await new ActionHelper(_settings).ExecuteGetAction<List<bGridTemperature>> ($"api/locations/{deskId}/temperature");
+        if (tempInfo.Count == 0)
         {
-            var json = await tempResponse.Content.ReadAsStringAsync();
-            var tempInfo = JsonConvert.DeserializeObject<List<bGridTemperature>>(json);
-            if (tempInfo.Count == 0)
-            {
 
-                return $"I do not have information on {deskName} for you.";
-            }
-            else
-            {
-                var temp = tempInfo.Last();
-                var msg =  $"The temperature in {deskName} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
-                return msg;
-            }
+            return $"I do not have information on {deskName} for you.";
         }
         else
         {
-            return $"Could not retrieve temperature for {deskName}.";
+            var temp = tempInfo.Last();
+            var msg = $"The temperature in {deskName} is {Math.Round(temp.value, 0, MidpointRounding.AwayFromZero)} degrees celcius.";
+            return msg;
         }
     }
 
@@ -471,29 +364,18 @@ public class BuildingDialog : LuisDialog<object>
         else
             memory.Add("lastDevice", deskId);
 
-        var bGridClient = GetHttpClient();
-        var occupancyResponse = await bGridClient.GetAsync($"/api/occupancy/office/{deskId}");
-        if (occupancyResponse.IsSuccessStatusCode)
+        var occupancyInfo = await new ActionHelper(_settings).ExecuteGetAction<bGridOccpancy>($"/api/occupancy/office/{deskId}");
+        if (occupancyInfo != null)
         {
             var deskNum = Convert.ToInt32(deskId);
             var deskName = _settings.BGridNodes.Where(n => n.bGridId == deskNum).First().Name;
 
-            var json = await occupancyResponse.Content.ReadAsStringAsync();
-            var occupancyInfo = JsonConvert.DeserializeObject<bGridOccpancy>(json);
-            if (occupancyInfo == null)
-            {
-                var msg = $"I do not have information on {deskName} for you.";
-                await context.SayAsync(msg, msg); 
-            }
-            else
-            {
-                var msg = (occupancyInfo.value != 1) ? $"Yes, {deskName} is available." : $"No, {deskName} is not available.";
-                //await context.SayAsync(msg, msg);
-                var promptText = msg + $" Do you want more information of {deskName}?";
-                var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
-                var prompt = new PromptDialog.PromptString(promptOption);
-                context.Call<string>(prompt, this.ResumeGetTemperatureAfterMoreInfoConfirmation);
-            }
+            var msg = (occupancyInfo.value != 1) ? $"Yes, {deskName} is available." : $"No, {deskName} is not available.";
+            //await context.SayAsync(msg, msg);
+            var promptText = msg + $" Do you want more information of {deskName}?";
+            var promptOption = new PromptOptions<string>(promptText, null, speak: promptText);
+            var prompt = new PromptDialog.PromptString(promptOption);
+            context.Call<string>(prompt, this.ResumeGetTemperatureAfterMoreInfoConfirmation);
         }
         else
         {
@@ -506,10 +388,8 @@ public class BuildingDialog : LuisDialog<object>
     {
         var nodeType = actionType == "work" ? "desk" : "room";
         var msg = "";
-        var locations = await ExecuteAction<List<bGridLocations>>("/api/locations");
-        var desks = await ExecuteAction<List<bGridOccpancy>>("/api/occupancy/office/");
-
-
+        var locations = await new ActionHelper(_settings).ExecuteGetAction<List<bGridLocations>>("/api/locations");
+        var desks = await new ActionHelper(_settings).ExecuteGetAction<List<bGridOccpancy>>("/api/occupancy/office/");
 
         if (desks == null)
             msg = "I could not retrieve availability information.";
@@ -564,22 +444,6 @@ public class BuildingDialog : LuisDialog<object>
 
     }
 
-    private async Task<T> ExecuteAction<T>(string action)
-    {
-        var bGridClient = GetHttpClient();
-        var response = await bGridClient.GetAsync(action);
-
-        if (response.IsSuccessStatusCode)
-        {
-            var jsonString = await response.Content.ReadAsStringAsync();
-            var jsonObject = JsonConvert.DeserializeObject<T>(jsonString);
-            return jsonObject;
-        }
-        else
-        {
-            return default(T);
-        }
-    }
 
     private async Task<string> SetAllLights(string roomName, string lightState)
     {
@@ -593,7 +457,7 @@ public class BuildingDialog : LuisDialog<object>
 
     private async Task<string> SetLight(string islandId, string lightState)
     {
-        var bGridClient = GetHttpClient();
+        var bGridClient = new ActionHelper(_settings).GetHttpClient();
         var json = "{ \"status\" : \"" + lightState + "\", \"return_address\":\"localhost\" }";
 
         var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
@@ -648,7 +512,7 @@ public class BuildingDialog : LuisDialog<object>
             islandId = lights.First().bGridId.ToString();
         }
 
-        var bGridClient = GetHttpClient();
+        var bGridClient = new ActionHelper(_settings).GetHttpClient();
         var obj = new
         {
             intensity = int.Parse(lightIntensity),
@@ -734,21 +598,20 @@ public class BuildingDialog : LuisDialog<object>
 
     private async Task ResumeDimLightAfterOrderDeskClarification(IDialogContext context, IAwaitable<string> result)
     {
-        var islandId = await result;
-        islandId = RemoveNonCharactersAndSpace(islandId);
-        var msg = await SetlightIntensity(islandId, _lightIntensity);
+        var roomname = await result;
+        var msg = await SetlightIntensity(roomname, _lightIntensity);
         await context.SayAsync(msg, msg);
     }
 
     private async Task ResumeFindAfterAssetClarification(IDialogContext context, IAwaitable<string> result)
     {
-        var assetId = await result;
-        assetId = RemoveNonCharactersAndSpace(assetId);
-        var msg = await FindAsset(assetId);
+        var assetName = await result;
+        var assetHelper = new AssetHelper(_settings);
+        var msg = await assetHelper.GetAssetLocation(assetName);
         await context.SayAsync(msg, msg);
     }
 
-    private string RemoveNonCharactersAndSpace(string input)
+    public string RemoveNonCharactersAndSpace(string input)
     {
         //Regex rgx = new Regex("[^a-zA-Z0-9 -]");
         //return rgx.Replace(input, "");

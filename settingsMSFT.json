@@ -34,24 +34,6 @@
       "Name": "light 1",
       "Type": "island",
       "RoomName": "2301"
-    },
-    {
-      "bGridId": 23400,
-      "Name": "light 2",
-      "Type": "island",
-      "RoomName": "2301"
-    },
-    {
-      "bGridId": 23400,
-      "Name": "light 3",
-      "Type": "island",
-      "RoomName": "2301"
-    },
-    {
-      "bGridId": 23400,
-      "Name": "light 4",
-      "Type": "island",
-      "RoomName": "2301"
     }
   ],
   "BGridAssets": [
@@ -65,5 +47,16 @@
       "Type": "asset",
       "AssetId": "67890"
     }
+  ],
+  "Spots": [
+    {
+      "Level": 2,
+      "Name" :  "somewhere on floor two",
+      "X1": -21,
+      "Y1": -73,
+      "X2": 0,
+      "Y2" : -25
+    }
   ]
+
 }

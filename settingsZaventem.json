@@ -1,0 +1,58 @@
+{
+	"bGridEndPoint": "https://mszaventemlab.bgrid.ws:8443",
+	"bGridUser": "cortana",
+	"bGridPassword": "tRb9TsNuaEvJdvkh",
+	"bGridDefaultIsland": "23400",
+	"bGridDefaultRoom": "2301",
+	"AuthorizedUsers": [
+		"svandenhoven@hotmail.com",
+		"ocp-invoke1@outlook.com",
+		"default-user"
+	],
+	"Assistants": [
+		{
+			"Id": 0,
+			"RoomName": "",
+			"DeviceAccount": ""
+		}
+	],
+  "BGridNodes": [
+    {
+      "bGridId": 2254,
+      "Name": "2254",
+      "Type": "room",
+      "RoomName": "2301"
+    },
+    {
+      "bGridId": 25233,
+      "Name": "25233",
+      "Type": "island",
+      "RoomName": "light1"
+    },
+    {
+      "bGridId": 25134,
+      "Name": "25134",
+      "Type": "island",
+      "RoomName": "light2"
+    },
+    {
+      "bGridId": 25242,
+      "Name": "25242",
+      "Type": "island",
+      "RoomName": "light3"
+    },
+    {
+      "bGridId": 25132,
+      "Name": "251342",
+      "Type": "island",
+      "RoomName": "light4"
+    }
+  ],
+	"BGridAssets": [
+		{
+			"Name": "dummy",
+			"Type": "asset",
+			"AssetId": "12345"
+		}
+	]
+}
