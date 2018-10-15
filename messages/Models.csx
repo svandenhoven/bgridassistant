@@ -162,6 +162,7 @@ public class BGridAsset
     public string Name { get; set; }
 }
 
+[Serializable]
 public class BGridRectangle
 {
     public string Level { get; set; }
