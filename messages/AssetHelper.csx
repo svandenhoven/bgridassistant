@@ -19,7 +19,7 @@ public class AssetHelper
         if (assets.Count() > 0)
         {
             var assetId = assets.First().AssetId.ToString();
-            var msg = await FindAsset(assetId);
+            var msg = await FindAsset(assetId, assetName);
             return msg;
         }
         else
@@ -30,7 +30,7 @@ public class AssetHelper
     }
 
 
-    public async Task<string> FindAsset(string assetId)
+    public async Task<string> FindAsset(string assetId, string assetName)
     {
         ////Write desk to memory for future use.
         //if (memory.ContainsKey("lastAsset"))
@@ -48,13 +48,23 @@ public class AssetHelper
             var spot = FindSpot(x, y);
 
             if (spot != "")
-                msg = $"Asset {assetId} can be found at square {spot}.";
+                msg = $"{assetName} can be found {spot}.";
             else
-                msg = $"Asset {assetId} can be found at coordinate {x.ToString()}, {y.ToString()}.";
+                msg = $"{assetName} can be found at coordinate {x.ToString()}, {y.ToString()}.";
         }
         else
         {
-            msg = $"Cannot find location of asset {assetId}";
+            msg = $"Cannot find {assetName} Getting random location. ";
+            var rand = new Random();
+            var x = rand.Next(-21, 0);
+            var y = rand.Next(-73, -25);
+            var spot = FindSpot(x, y);
+
+            if (spot != "")
+                msg += $"{assetName} can be found {spot}.";
+            else
+                msg += $"{assetName} can be found at coordinate {x.ToString()}, {y.ToString()}.";
+
         }
         return msg;
     }

@@ -51,11 +51,35 @@
   "Spots": [
     {
       "Level": 2,
-      "Name" :  "somewhere on floor two",
+      "Name": "right in silence area on floor 2",
       "X1": -21,
-      "Y1": -73,
+      "Y1": -60,
+      "X2": -10,
+      "Y2": -60
+    },
+    {
+      "Level": 2,
+      "Name": "left in silence area on floor 2",
+      "X1": -10,
+      "Y1": -60,
       "X2": 0,
-      "Y2" : -25
+      "Y2": -60
+    },
+    {
+      "Level": 2,
+      "Name": "somewhere right in working area on floor 2",
+      "X1": -21,
+      "Y1": -60,
+      "X2": -10,
+      "Y2": -25
+    },
+    {
+      "Level": 2,
+      "Name": "somewhere left in working area on floor 2",
+      "X1": -10,
+      "Y1": -60,
+      "X2": 0,
+      "Y2": -25
     }
   ]
 
