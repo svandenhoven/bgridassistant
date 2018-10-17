@@ -182,6 +182,7 @@ public class Building
     public string bGridPassword { get; set; }
     public string bGridDefaultIsland { get; set; }
     public string bGridDefaultRoom { get; set; }
+    public bool AssettrackingRandomizer { get; set; }
     public List<string> AuthorizedUsers { get; set; }
     public List<BGridNode> BGridNodes { get; set; }
     public List<AssistantDevices> Assistants { get; set; }

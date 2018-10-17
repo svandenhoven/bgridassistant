@@ -4,6 +4,7 @@
   "bGridPassword": "Bt405XQyDm70dKR3ibIEvIcu",
   "bGridDefaultIsland": "23400",
   "bGridDefaultRoom": "2301",
+  "AssettrackingRandomizer" :  true,
   "AuthorizedUsers": [
     "svandenhoven@hotmail.com",
     "ocp-invoke1@outlook.com",
@@ -67,7 +68,7 @@
     },
     {
       "Level": 2,
-      "Name": "somewhere right in working area on floor 2",
+      "Name": "In a working area right on floor 2",
       "X1": -21,
       "Y1": -60,
       "X2": -10,
@@ -75,7 +76,7 @@
     },
     {
       "Level": 2,
-      "Name": "somewhere left in working area on floor 2",
+      "Name": "in working area left on floor 2",
       "X1": -10,
       "Y1": -60,
       "X2": 0,

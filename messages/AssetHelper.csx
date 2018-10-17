@@ -54,7 +54,7 @@ public class AssetHelper
         }
         else
         {
-            msg = $"Cannot find {assetName} Getting random location. ";
+            msg = $"Cannot find {assetName}. Getting random location as a demonstration. ";
             var rand = new Random();
             var x = rand.Next(-21, 0);
             var y = rand.Next(-73, -25);
