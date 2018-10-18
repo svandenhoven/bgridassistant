@@ -2,6 +2,7 @@
 #load "Models.csx"
 #load "ActionHelper.csx"
 #load "LightsHelper.csx"
+#load "AssetHelper.csx"
 
 using System;
 using System.Net;
@@ -27,6 +28,7 @@ public class AlexaProcessor
     {
         var msg = "";
         var lightId = DefineLightId(request);
+        var assetId = DefineAssetId(request);
 
         switch (request.request.intent.name)
         {
@@ -37,7 +39,10 @@ public class AlexaProcessor
                 msg = await new LightsHelper(_settings).SwitchLights(lightId, "off");
                 break;
             case "DimLight":
-                msg = await SetlightIntensity(lightId, "25");
+                msg = await new LightsHelper(_settings).SetlightIntensity(lightId, "25");
+                break;
+            case "FindAsset":
+                msg = await new AssetHelper(_settings).GetAssetLocation(assetId);
                 break;
             default:
                 break;
@@ -48,12 +53,36 @@ public class AlexaProcessor
 
     private string DefineLightId(AlexaRequest alexa)
     {
-        var roomId = alexa.request.intent.slots.roomId.value;
-        if (roomId != null)
-            return roomId;
+        if (alexa.request.intent.slots.roomId != null)
+        {
+            var roomId = alexa.request.intent.slots.roomId.value;
+            if (roomId != null)
+                return roomId;
+            else
+                return _settings.bGridDefaultRoom;
+        }
         else
-            return _settings.bGridDefaultRoom;
+        {
+            return "";
+        }
     }
+
+    private string DefineAssetId(AlexaRequest alexa)
+    {
+        if (alexa.request.intent.slots.assetId != null)
+        {
+            var assetId = alexa.request.intent.slots.assetId.value;
+            if (assetId != null)
+                return assetId;
+            else
+                return "";
+        }
+        else
+        {
+            return "";
+        }
+    }
+
     private AlexaResponse CreateAlexaResponse(string message)
     {
         return new AlexaResponse
@@ -71,52 +100,6 @@ public class AlexaProcessor
         };
     }
 
-    private string SwitchLights(string islandId, string state)
-    {
-        var bGridClient = new ActionHelper(_settings).GetHttpClient();
-        var json = "{ \"status\" : \"" + state + "\", \"return_address\":\"localhost\" }";
-        var ob = new
-        {
-            status = "on",
-            return_address = "localhost"
-        };
 
-        var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var lightResponse = bGridClient.PostAsync($"/api/islands/{islandId}/light/status", httpContent).Result;
-        if (lightResponse.IsSuccessStatusCode)
-        {
-            return $"The light is {state}.";
-
-        }
-        else
-        {
-            return $"Could not switch light";
-        }
-    }
-
-    private async Task<string> SetlightIntensity(string islandId, string lightIntensity)
-    {
-        var bGridClient = new ActionHelper(_settings).GetHttpClient();
-        var obj = new
-        {
-            intensity = int.Parse(lightIntensity),
-            return_address = "localhost"
-        };
-
-        var json = JsonConvert.SerializeObject(obj);
-
-        var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var lightResponse = await bGridClient.PostAsync($"/api/islands/{islandId}/light/intensity", httpContent);
-        if (lightResponse.IsSuccessStatusCode)
-        {
-            return $"Dimmed lights of {islandId} to {lightIntensity} procent.";
-        }
-        else
-        {
-            return $"Could not set lightIntensity for {islandId}";
-        }
-    }
 }
    
