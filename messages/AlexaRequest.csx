@@ -52,30 +52,14 @@ using System.Threading.Tasks;
 
     public class Slots
     {
-        public Automateddevice AutomatedDevice { get; set; }
-        public AutomatedAction AutomatedAction { get; set; }
-        public ActionMoment ActionMoment { get; set; }
+        public RoomId roomId { get; set; }
     }
 
-    public class Automateddevice
+    public class RoomId
     {
         public string name { get; set; }
         public string value { get; set; }
     }
-
-    //AutomatedAction
-    public class AutomatedAction
-    {
-        public string name { get; set; }
-        public string value { get; set; }
-    }
-
-    public class ActionMoment
-    {
-        public string name { get; set; }
-        public string value { get; set; }
-    }
-
     public class Context
     {
         public Audioplayer AudioPlayer { get; set; }

@@ -26,17 +26,18 @@ public class AlexaProcessor
     public async Task<AlexaResponse> ProcessAlexaRequest(AlexaRequest request)
     {
         var msg = "";
+        var lightId = DefineLightId(request);
 
         switch (request.request.intent.name)
         {
             case "LightOn":
-                msg = await new LightsHelper(_settings).SwitchLights("2301", "on");
+                msg = await new LightsHelper(_settings).SwitchLights(lightId, "on");
                 break;
             case "LightOff":
-                msg = await new LightsHelper(_settings).SwitchLights("2301", "off");
+                msg = await new LightsHelper(_settings).SwitchLights(lightId, "off");
                 break;
             case "DimLight":
-                msg = await SetlightIntensity("2301", "25");
+                msg = await SetlightIntensity(lightId, "25");
                 break;
             default:
                 break;
@@ -45,6 +46,14 @@ public class AlexaProcessor
         return CreateAlexaResponse(msg);
     }
 
+    private string DefineLightId(AlexaRequest alexa)
+    {
+        var roomId = alexa.request.intent.slots.roomId.value;
+        if (roomId != null)
+            return roomId;
+        else
+            return _settings.bGridDefaultRoom;
+    }
     private AlexaResponse CreateAlexaResponse(string message)
     {
         return new AlexaResponse
