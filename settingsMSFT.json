@@ -54,15 +54,15 @@
       "Level": 2,
       "Name": "right in silence area on floor 2",
       "X1": -21,
-      "Y1": -60,
-      "X2": -10,
+      "Y1": -73,
+      "X2": -11,
       "Y2": -60
     },
     {
       "Level": 2,
       "Name": "left in silence area on floor 2",
       "X1": -10,
-      "Y1": -60,
+      "Y1": -73,
       "X2": 0,
       "Y2": -60
     },
@@ -71,7 +71,7 @@
       "Name": "In a working area right on floor 2",
       "X1": -21,
       "Y1": -60,
-      "X2": -10,
+      "X2": -11,
       "Y2": -25
     },
     {
