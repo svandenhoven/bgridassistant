@@ -3,6 +3,7 @@
 #load "ActionHelper.csx"
 #load "LightsHelper.csx"
 #load "AssetHelper.csx"
+#load "RoomHelper.csx"
 
 using System;
 using System.Net;
@@ -44,6 +45,9 @@ public class AlexaProcessor
             case "FindAsset":
                 msg = await new AssetHelper(_settings).GetAssetLocation(assetId);
                 break;
+            case "FindRoom":
+                msg = await new RoomHelper(_settings).GetOfficeOccupancy("call");
+                break;
             default:
                 break;
         }
@@ -78,6 +82,9 @@ public class AlexaProcessor
                 return "";
         }
         else
+        {
+
+        }
         {
             return "";
         }
