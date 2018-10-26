@@ -54,6 +54,13 @@ public class Slots
 {
     public RoomId roomId { get; set; }
     public AssetId assetId { get; set; }
+    public ActionType actionType { get; set; }
+}
+
+public class ActionType
+{
+    public string name { get; set; }
+    public string value { get; set; }
 }
 
 public class AssetId

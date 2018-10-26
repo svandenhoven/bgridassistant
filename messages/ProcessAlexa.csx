@@ -30,6 +30,7 @@ public class AlexaProcessor
         var msg = "";
         var lightId = DefineLightId(request);
         var assetId = DefineAssetId(request);
+        var actionId = DefineActionType(request);
 
         switch (request.request.intent.name)
         {
@@ -46,7 +47,7 @@ public class AlexaProcessor
                 msg = await new AssetHelper(_settings).GetAssetLocation(assetId);
                 break;
             case "FindRoom":
-                msg = await new RoomHelper(_settings).GetOfficeOccupancy("call");
+                msg = await new RoomHelper(_settings).GetOfficeOccupancy(actionId);
                 break;
             default:
                 break;
@@ -89,6 +90,26 @@ public class AlexaProcessor
             return "";
         }
     }
+
+    private string DefineActionType(AlexaRequest alexa)
+    {
+        if (alexa.request.intent.slots.assetId != null)
+        {
+            var assetId = alexa.request.intent.slots.actionType.value;
+            if (assetId != null)
+                return assetId;
+            else
+                return "";
+        }
+        else
+        {
+
+        }
+        {
+            return "";
+        }
+    }
+
 
     private AlexaResponse CreateAlexaResponse(string message)
     {
