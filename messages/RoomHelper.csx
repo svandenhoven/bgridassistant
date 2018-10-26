@@ -49,7 +49,7 @@ public class RoomHelper
                 if (uniqueRoomNames.Count() > 0)
                 {
                     int i = 1;
-                    msg += actionType == "work" ? "The workplace" : "The room";
+                    msg += actionType == "work" ? "The workplace" : ActionType == "call" ? "The booth" : "The room";
                     msg += (uniqueRoomNames.Count() > 1) ? "s " : " ";
                     foreach (var spot in uniqueRoomNames)
                     {
@@ -66,7 +66,7 @@ public class RoomHelper
                     msg += " available.";
                 }
                 else
-                    msg = "No places are available.";
+                    msg = $"No places are available to {actionType}.";
             }
         }
         return msg;
