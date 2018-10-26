@@ -49,7 +49,7 @@ public class RoomHelper
                 if (uniqueRoomNames.Count() > 0)
                 {
                     int i = 1;
-                    msg += actionType == "work" ? "The workplace" : ActionType == "call" ? "The phone booth" : "The room";
+                    msg += actionType == "work" ? "The workplace" : "The room";
                     msg += (uniqueRoomNames.Count() > 1) ? "s " : " ";
                     foreach (var spot in uniqueRoomNames)
                     {
