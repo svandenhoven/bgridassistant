@@ -44,13 +44,14 @@ public class AssetHelper
         {
             var x = Convert.ToInt32(asset.x);
             var y = Convert.ToInt32(asset.y);
+            var floor = asset.floor;
 
-            var spot = FindSpot(x, y);
+            var spot = FindSpot(x, y, floor);
 
             if (spot != "")
                 msg = $"{assetName} can be found {spot}.";
             else
-                msg = $"{assetName} can be found at coordinate {x.ToString()}, {y.ToString()}.";
+                msg = $"{assetName} can be found at coordinate {x.ToString()}, {y.ToString()} on floor {floor.ToString()}.";
         }
         else
         {
@@ -58,7 +59,8 @@ public class AssetHelper
             var rand = new Random();
             var x = rand.Next(-21, 0);
             var y = rand.Next(-73, -25);
-            var spot = FindSpot(x, y);
+            var floor = rand.Next(1, 4);
+            var spot = FindSpot(x, y, floor);
 
             if (spot != "")
                 msg += $"{assetName} can be found {spot}.";
@@ -70,13 +72,13 @@ public class AssetHelper
     }
 
 
-    private string FindSpot(double x, double y)
+    private string FindSpot(double x, double y, int floor)
     {
         var spotName = "";
         var spots = _settings.Spots;
         foreach (var s in spots)
         {
-            if (x >= s.X1 && x < s.X2 && y >= s.Y1 && y < s.Y2)
+            if (s.Level == floor.ToString() && x >= s.X1 && x < s.X2 && y >= s.Y1 && y < s.Y2)
             {
                 spotName = s.Name;
                 break;

@@ -41,12 +41,12 @@
     {
       "Name": "lisa",
       "Type": "asset",
-      "AssetId": "12345"
+      "AssetId": "5472"
     },
     {
       "Name": "john",
-      "Type": "asset", 
-      "AssetId": "67890"
+      "Type": "asset",
+      "AssetId": "5656"
     }
   ],
   "Spots": [
