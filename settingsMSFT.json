@@ -1,0 +1,125 @@
+{
+  "bGridEndPoint": "https://microsoft-schiphol.evalan.com:8443",
+  "bGridUser": "",
+  "bGridPassword": "",
+  "bGridDefaultIsland": "",
+  "bGridDefaultRoom": "",
+  "AssettrackingRandomizer" :  true,
+  "AuthorizedUsers": [
+    ""
+  ],
+  "Assistants": [
+    {
+      "Id": 23400,
+      "RoomName": "meeting room 2301",
+      "DeviceAccount": ""
+    }
+  ],
+  "BGridNodes": [
+    {
+      "bGridId": 2254,
+      "Name": "2254",
+      "Type": "room",
+      "RoomName": "2301"
+    },
+    {
+      "bGridId": 2246,
+      "Name": "2246",
+      "Type": "room",
+      "RoomName": "2301"
+    },
+    {
+      "bGridId": 23400,
+      "Name": "light 1",
+      "Type": "island",
+      "RoomName": "2301"
+    }
+  ],
+  "BGridAssets": [
+    {
+      "Name": "lisa",
+      "Type": "asset",
+      "AssetId": "5472"
+    },
+    {
+      "Name": "john",
+      "Type": "asset",
+      "AssetId": "5656"
+    }
+  ],
+  "Spots": [
+    {
+      "Level": 2,
+      "Name": "last table right in silence area on floor 2",
+      "X1": -21,
+      "Y1": -73,
+      "X2": -11,
+      "Y2": -66
+    },
+    {
+      "Level": 2,
+      "Name": "first table right in silence area on floor 2",
+      "X1": -21,
+      "Y1": -66,
+      "X2": -11,
+      "Y2": -60
+    },
+    {
+      "Level": 2,
+      "Name": "last table left in silence area on floor 2",
+      "X1": -10,
+      "Y1": -73,
+      "X2": 0,
+      "Y2": -66
+    },
+    {
+      "Level": 2,
+      "Name": "first table in silence area on floor 2",
+      "X1": -10,
+      "Y1": -66,
+      "X2": 0,
+      "Y2": -60
+    },
+    {
+      "Level": 2,
+      "Name": "At working tables right on floor 2 next to silent area",
+      "X1": -21,
+      "Y1": -60,
+      "X2": -11,
+      "Y2": -55
+    },
+    {
+      "Level": 2,
+      "Name": "At working areas on right side on floor 2",
+      "X1": -21,
+      "Y1": -55,
+      "X2": -11,
+      "Y2": -35
+    },
+    {
+      "Level": 2,
+      "Name": "In coffee area on floor 2",
+      "X1": -21,
+      "Y1": -35,
+      "X2": -11,
+      "Y2": -25
+    },
+    {
+      "Level": 2,
+      "Name": "At working tables left on floor 2 next to silent area",
+      "X1": -10,
+      "Y1": -60,
+      "X2": 0,
+      "Y2": -55
+    },
+    {
+      "Level": 2,
+      "Name": "in working areas left on floor 2",
+      "X1": -10,
+      "Y1": -55,
+      "X2": 0,
+      "Y2": -25
+    }
+  ]
+
+}
