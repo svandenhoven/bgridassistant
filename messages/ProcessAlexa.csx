@@ -93,11 +93,11 @@ public class AlexaProcessor
 
     private string DefineActionType(AlexaRequest alexa)
     {
-        if (alexa.request.intent.slots.assetId != null)
+        if (alexa.request.intent.slots.actionType != null)
         {
-            var assetId = alexa.request.intent.slots.actionType.value;
-            if (assetId != null)
-                return assetId;
+            var actionType = alexa.request.intent.slots.actionType.value;
+            if (actionType != null)
+                return actionType;
             else
                 return "";
         }
