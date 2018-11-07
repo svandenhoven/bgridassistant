@@ -46,31 +46,33 @@ public class AssetHelper
             var y = Convert.ToInt32(asset.y);
             var floor = asset.floor;
 
-            var spot = FindSpot(x, y, floor);
+            if (CalcLastSeen(asset.lastSeen) < 900)
+            {
+                var spot = FindSpot(x, y, floor);
 
-            if (spot != "")
-                msg = $"{assetName} can be found {spot}.";
+                if (spot != "")
+                    msg = $"{assetName} can be found {spot}.";
+                else
+                    msg = $"{assetName} can be found at coordinate {x.ToString()}, {y.ToString()} on floor {floor.ToString()}.";
+            }
             else
-                msg = $"{assetName} can be found at coordinate {x.ToString()}, {y.ToString()} on floor {floor.ToString()}.";
+            {
+                msg = $"I have not seen {assetName} for 15 minutes or more.";
+            }
         }
         else
         {
-            msg = $"Cannot find {assetName}. Getting random location as a demonstration. ";
-            var rand = new Random();
-            var x = rand.Next(-21, 0);
-            var y = rand.Next(-73, -25);
-            var floor = rand.Next(1, 4);
-            var spot = FindSpot(x, y, floor);
-
-            if (spot != "")
-                msg += $"{assetName} can be found {spot}.";
-            else
-                msg += $"{assetName} can be found at coordinate {x.ToString()}, {y.ToString()}.";
-
+            msg = $"I do not know {assetName}.";
         }
         return msg;
     }
 
+    public static long CalcLastSeen(int lastseen)
+    {
+        DateTime sTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        return (long)((DateTime.UtcNow - sTime).TotalSeconds - lastseen);
+    }
 
     private string FindSpot(double x, double y, int floor)
     {
