@@ -10,8 +10,15 @@
   ],
   "Assistants": [
     {
-      "Id": 23400,
+      "Id": "",
+      "Type": "cortana",
       "RoomName": "meeting room 2301",
+      "DeviceAccount": ""
+    },
+    {
+      "Id": "",
+      "Type": "alexa",
+      "RoomName": "study",
       "DeviceAccount": ""
     }
   ],

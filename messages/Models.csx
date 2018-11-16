@@ -141,6 +141,7 @@ public class Parkingplace
 public class AssistantDevices
 {
     public string Id { get; set; }
+    public string Type {get; set;}
     public string RoomName { get; set; }
     public string DeviceAccount { get; set; }
 }
