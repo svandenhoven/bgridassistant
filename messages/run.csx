@@ -49,102 +49,107 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
     }
     else
     {
+        var response = await ProcessBotFramework(req, log, settings);
+        return response;
+    }
+}
 
-        // Initialize the azure bot
-        using (BotService.Initialize())
+public static async Task<HttpResponseMessage> ProcessBotFramework(HttpRequestMessage req, TraceWriter log, Building settings)
+{
+    // Initialize the azure bot
+    using (BotService.Initialize())
+    {
+        // Deserialize the incoming activity
+        string jsonContent = await req.Content.ReadAsStringAsync();
+        var activity = JsonConvert.DeserializeObject<Activity>(jsonContent);
+
+        // authenticate incoming request and add activity.ServiceUrl to MicrosoftAppCredentials.TrustedHostNames
+        // if request is authenticated
+        if (!await BotService.Authenticator.TryAuthenticateAsync(req, new[] { activity }, CancellationToken.None))
         {
-            // Deserialize the incoming activity
-            string jsonContent = await req.Content.ReadAsStringAsync();
-            var activity = JsonConvert.DeserializeObject<Activity>(jsonContent);
+            return BotAuthenticator.GenerateUnauthorizedResponse(req);
+        }
 
-            // authenticate incoming request and add activity.ServiceUrl to MicrosoftAppCredentials.TrustedHostNames
-            // if request is authenticated
-            if (!await BotService.Authenticator.TryAuthenticateAsync(req, new[] { activity }, CancellationToken.None))
+
+        if (activity != null)
+        {
+            var activityTxt = JsonConvert.SerializeObject(activity);
+            log.Info($"Activity: {activityTxt}.");
+
+            var channeldata = activity.ChannelData;
+            var channeldatatxt = JsonConvert.SerializeObject(channeldata);
+            log.Info($"ChannelData: {channeldatatxt}.");
+
+            var userInfo = activity.Entities.FirstOrDefault(e => e.Type.Equals("UserInfo"));
+
+            //Authorize any allowed users
+            var email = "unknown";
+            var authorized = false;
+            if (userInfo != null)
             {
-                return BotAuthenticator.GenerateUnauthorizedResponse(req);
-            }
+                var userInfoTxt = JsonConvert.SerializeObject(userInfo);
+                log.Info($"UserInfo: {userInfoTxt}.");
 
-
-            if (activity != null)
-            {
-                var activityTxt = JsonConvert.SerializeObject(activity);
-                log.Info($"Activity: {activityTxt}.");
-
-                var channeldata = activity.ChannelData;
-                var channeldatatxt = JsonConvert.SerializeObject(channeldata);
-                log.Info($"ChannelData: {channeldatatxt}.");
-
-                var userInfo = activity.Entities.FirstOrDefault(e => e.Type.Equals("UserInfo"));
-
-                //Authorize any allowed users
-                var email = "unknown";
-                var authorized = false;
-                if (userInfo != null)
+                email = userInfo.Properties.Value<string>("email");
+                log.Info($"Email User: {email}");
+                if (!string.IsNullOrEmpty(email))
                 {
-                    var userInfoTxt = JsonConvert.SerializeObject(userInfo);
-                    log.Info($"UserInfo: {userInfoTxt}.");
-
-                    email = userInfo.Properties.Value<string>("email");
-                    log.Info($"Email User: {email}");
-                    if (!string.IsNullOrEmpty(email))
+                    if (settings.AuthorizedUsers.Contains(email))
                     {
-                        if (settings.AuthorizedUsers.Contains(email))
-                        {
-                            authorized = true;
-                        }
+                        authorized = true;
                     }
                 }
-
-                //remove
-                if (settings.AuthorizedUsers.Contains("default-user"))
-                {
-                    authorized = true;
-                }
-
-                if (!authorized)
-                {
-                    var client = new ConnectorClient(new Uri(activity.ServiceUrl));
-                    var reply = activity.CreateReply();
-                    reply.Text = $"You are not authorized to use this skill. Your user name is {email}.";
-                    await client.Conversations.ReplyToActivityAsync(reply);
-                    return req.CreateResponse(HttpStatusCode.Accepted);
-                }
-
-                // one of these will have an interface and process it
-                switch (activity.GetActivityType())
-                {
-                    case ActivityTypes.Message:
-                        await Conversation.SendAsync(activity, () => new BuildingDialog());
-                        break;
-                    case ActivityTypes.ConversationUpdate:
-                        var client = new ConnectorClient(new Uri(activity.ServiceUrl));
-                        IConversationUpdateActivity update = activity;
-                        if (update.MembersAdded.Any())
-                        {
-                            var reply = activity.CreateReply();
-                            var newMembers = update.MembersAdded?.Where(t => t.Id != activity.Recipient.Id);
-                            foreach (var newMember in newMembers)
-                            {
-                                reply.Text = "Welcome";
-                                if (!string.IsNullOrEmpty(newMember.Name))
-                                {
-                                    reply.Text += $" {newMember.Name}";
-                                }
-                                reply.Text += "!";
-                                await client.Conversations.ReplyToActivityAsync(reply);
-                            }
-                        }
-                        break;
-                    case ActivityTypes.ContactRelationUpdate:
-                    case ActivityTypes.Typing:
-                    case ActivityTypes.DeleteUserData:
-                    case ActivityTypes.Ping:
-                    default:
-                        log.Error($"Unknown activity type ignored: {activity.GetActivityType()}");
-                        break;
-                }
             }
-            return req.CreateResponse(HttpStatusCode.Accepted);
+
+            //remove
+            if (settings.AuthorizedUsers.Contains("default-user"))
+            {
+                authorized = true;
+            }
+
+            if (!authorized)
+            {
+                var client = new ConnectorClient(new Uri(activity.ServiceUrl));
+                var reply = activity.CreateReply();
+                reply.Text = $"You are not authorized to use this skill. Your user name is {email}.";
+                await client.Conversations.ReplyToActivityAsync(reply);
+                return req.CreateResponse(HttpStatusCode.Accepted);
+            }
+
+            // one of these will have an interface and process it
+            switch (activity.GetActivityType())
+            {
+                case ActivityTypes.Message:
+                    await Conversation.SendAsync(activity, () => new BuildingDialog());
+                    break;
+                case ActivityTypes.ConversationUpdate:
+                    var client = new ConnectorClient(new Uri(activity.ServiceUrl));
+                    IConversationUpdateActivity update = activity;
+                    if (update.MembersAdded.Any())
+                    {
+                        var reply = activity.CreateReply();
+                        var newMembers = update.MembersAdded?.Where(t => t.Id != activity.Recipient.Id);
+                        foreach (var newMember in newMembers)
+                        {
+                            reply.Text = "Welcome";
+                            if (!string.IsNullOrEmpty(newMember.Name))
+                            {
+                                reply.Text += $" {newMember.Name}";
+                            }
+                            reply.Text += "!";
+                            await client.Conversations.ReplyToActivityAsync(reply);
+                        }
+                    }
+                    break;
+                case ActivityTypes.ContactRelationUpdate:
+                case ActivityTypes.Typing:
+                case ActivityTypes.DeleteUserData:
+                case ActivityTypes.Ping:
+                default:
+                    log.Error($"Unknown activity type ignored: {activity.GetActivityType()}");
+                    break;
+            }
         }
+        return req.CreateResponse(HttpStatusCode.Accepted);
     }
 }
