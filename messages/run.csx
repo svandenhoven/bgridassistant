@@ -44,6 +44,7 @@ public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
 
     if (SkillType == "Alexa")
     {
+        log.Info($"Alexa request from device: {request.context.System.device.deviceId}.");
         var response = await new AlexaProcessor(settings).ProcessAlexaRequest(request);
         return req.CreateResponse(HttpStatusCode.OK, response);
     }
