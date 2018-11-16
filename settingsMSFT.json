@@ -20,6 +20,12 @@
       "Type": "alexa",
       "RoomName": "study",
       "DeviceAccount": ""
+    },
+    {
+      "Id": "",
+      "Type": "alexa",
+      "RoomName": "2301",
+      "DeviceAccount": ""
     }
   ],
   "BGridNodes": [
