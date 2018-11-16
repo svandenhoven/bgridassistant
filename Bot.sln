@@ -18,6 +18,7 @@ Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "func", "..\..\..\AppData\Ro
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{36665A78-4D93-48C7-B432-4DA46AA140D5}"
 	ProjectSection(SolutionItems) = preProject
+		appsettings.json = appsettings.json
 		commands.json = commands.json
 		debughost.cmd = debughost.cmd
 		readme.md = readme.md
